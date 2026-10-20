@@ -35,18 +35,20 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "label": "Air temperature",
    "page": "drought",
    "file": "data/airtemp.json",
-   "built": false,
-   "months": false,
-   "periods": []
+   "built": true,
+   "months": true,
+   "periods": [],
+   "updated": "2026-10-20"
   },
   {
    "key": "et0",
    "label": "Evaporative demand",
    "page": "drought",
    "file": "data/et0.json",
-   "built": false,
-   "months": false,
-   "periods": []
+   "built": true,
+   "months": true,
+   "periods": [],
+   "updated": "2026-10-20"
   },
   {
    "key": "soilsurf",
