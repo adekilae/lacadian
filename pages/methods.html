@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Data and methods | LaCADIAN</title>
-<meta name="description" content="Sources, methods and limits of every LaCADIAN map.">
+<title>Data and methods | LaCADIAN Environmental Intelligence</title>
+<meta name="description" content="Sources, methods and limits of every LaCADIAN Environmental Intelligence map.">
 <link rel="stylesheet" href="../vendor/leaflet.css">
-<link rel="stylesheet" href="../css/main.css?v=5">
+<link rel="stylesheet" href="../css/main.css?v=6">
 </head>
 <body>
 <header id="hdr"></header>
@@ -28,7 +28,7 @@
 <tr><td>Boundaries</td><td>US Census Bureau</td><td>Parish outlines.</td><td></td></tr>
 </tbody></table></div>
 <h2>Checking the grids against the stations</h2>
-<p>The network's stations are not used to draw the parish maps. They are used to check them. The Rainfall and Soil moisture tabs each show a table underneath the map: gridMET rain against each station's gauge (daily and weekly correlation, ratio of totals, agreement on rain days), and SMAP soil moisture against the station sensors (rank correlation and difference). Treat the tables as a first test with short records, not proof.</p>
+<p>The network's stations are not used to draw the parish maps. They are used to check them. The Rainfall and Soil moisture layers each show a table underneath the map: gridMET rain against each station's gauge (daily and weekly correlation, ratio of totals, agreement on rain days), and SMAP soil moisture against the station sensors (rank correlation and difference). Treat the tables as a first test with short records, not proof.</p>
 <h2>What this site does not do</h2>
 <ul><li>It gives no advice on when to plant, irrigate, spray or insure.</li>
 <li>Parish values are averages. A field in a wet parish can be dry.</li>
@@ -39,7 +39,7 @@
 </main>
 <footer id="ftr"></footer>
 <script src="../vendor/leaflet.js"></script>
-<script src="../js/site.js?v=5"></script>
+<script src="../js/site.js?v=6"></script>
 <script>LC.getData("data/stations.json").then(function(d){var q=document.getElementById("quality");if(!d.quality||!d.quality.length){q.innerHTML="<li>None flagged in this update.</li>";return;}q.innerHTML=d.quality.map(function(x){return "<li>"+LC.esc(x.name)+" ("+LC.esc(x.station)+"): "+LC.esc(x.value)+" mm of rain recorded on "+LC.niceDate(x.date)+". Kept as published; to be checked against the gauge log.</li>";}).join("");}).catch(function(){});</script>
 
 </body>

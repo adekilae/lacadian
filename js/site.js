@@ -27,17 +27,32 @@
     });
   }
 
-  const NAV = [["Home", "index.html"], ["Stations", "pages/stations.html"], ["Drought", "pages/drought.html"],
-               ["Agriculture", "pages/agriculture.html"], ["Land and flood", "pages/land.html"], ["Methods", "pages/methods.html"], ["About", "pages/about.html"]];
+  const NAV = [["Map", "index.html"], ["Stations", "pages/stations.html"], ["Parish reports", "pages/parish.html"],
+               ["Data", "pages/data.html"], ["Methods", "pages/methods.html"], ["About", "pages/about.html"]];
 
   function frame() {
     const h = document.getElementById("hdr");
     if (h) {
       h.className = "top";
-      h.innerHTML = `<div class="wrap bar"><a class="brand" href="${ROOT}index.html" aria-label="LaCADIAN home"><span class="mark" aria-hidden="true"></span><span class="name">LaCADIAN</span></a>
-        <p class="tag">Louisiana Climate &amp; Digital Ag Network</p>
-        <nav class="nav" aria-label="Pages">${NAV.map(([t, u]) => `<a href="${ROOT}${u}"${t === PAGE ? ' aria-current="page"' : ""}>${esc(t)}</a>`).join("")}</nav></div>
+      h.innerHTML = `<div class="wrap bar"><a class="brand" href="${ROOT}index.html" aria-label="LaCADIAN Environmental Intelligence home"><span class="mark" aria-hidden="true"></span><span class="brandtext"><span class="name">LaCADIAN Environmental Intelligence</span><span class="name2">LAND · WATER · CLIMATE INTELLIGENCE</span></span></a>
+        <nav class="nav" aria-label="Pages">${NAV.map(([t, u]) => `<a href="${ROOT}${u}"${t === PAGE ? ' aria-current="page"' : ""}>${esc(t)}</a>`).join("")}</nav>
+        <form class="hsearch" role="search" onsubmit="return false"><input type="search" id="hs" name="lc-search" list="hs-list" autocomplete="off" spellcheck="false" placeholder="Search parish or layer…" aria-label="Search parish or layer"><datalist id="hs-list"></datalist></form></div>
         <div class="proto"><div class="wrap"><strong>Unofficial prototype for review.</strong> Built from public data by a graduate student. It has not been reviewed or approved by the LaCADIAN network team and must not be used for farm decisions.</div></div>`;
+      const box = document.getElementById("hs");
+      let index = null;
+      const load = () => index || (index = Promise.all([getData("data/parishes.geojson"), getData("data/layers.json")]).then(([gj, man]) => {
+        const items = [];
+        gj.features.forEach(f => items.push({ text: f.properties.name + " Parish", url: ROOT + "pages/parish.html#" + f.properties.id }));
+        man.layers.filter(l => l.built).forEach(l => items.push({ text: l.label + " (layer)", url: ROOT + "index.html#layer=" + l.key }));
+        document.getElementById("hs-list").innerHTML = items.map(i => `<option value="${esc(i.text)}">`).join("");
+        return items;
+      }).catch(() => []));
+      box.addEventListener("focus", load);
+      box.addEventListener("change", () => load().then(items => {
+        const q = box.value.trim().toLowerCase();
+        const hit = items.find(i => i.text.toLowerCase() === q) || items.find(i => i.text.toLowerCase().startsWith(q) && q.length > 1);
+        if (hit) location.href = hit.url;
+      }));
     }
     const f = document.getElementById("ftr");
     if (f) {

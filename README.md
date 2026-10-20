@@ -1,13 +1,17 @@
-# LaCADIAN site (unofficial prototype, for review)
+# LaCADIAN Environmental Intelligence (unofficial prototype, for review)
 
 Maps of Louisiana by parish, plus the LaCADIAN field stations. Static pages (Leaflet), no build step.
 
-| Page | Layers |
+| Page | What it does |
 |---|---|
-| Stations | soil moisture by depth, rain and dry days, soil temperature, soil conductivity |
-| Drought | rainfall against normal, soil moisture (SMAP), dry spells, US Drought Monitor |
-| Agriculture | cropland, main crops, 9 single-crop maps, soil pH, organic matter, clay, sand, bulk density, drainage |
-| Land and flood | vegetation, flood risk, surface water change |
+| Map (home) | statewide figures, layer sidebar in six groups, parish map, parish panel, ranking, time series, compare two parishes, related layers, data download |
+| Stations | soil moisture by depth, rain and dry days, soil temperature, soil conductivity at the field stations |
+| Parish reports | one-page report for any parish, printable, CSV |
+| Data | every layer as CSV or JSON |
+| Methods, About | sources, limits, status |
+
+Layers built so far: rainfall, soil moisture (SMAP), dry spells, Drought Monitor, cropland, main crops, 9 single-crop maps, soil pH, organic matter, clay, sand, bulk density, drainage, vegetation, flood risk, surface water change.
+Planned layers (air temperature, ET0, the pCC root-zone model, drought onset and gap, crop water stress, streamflow, recharge, land-cover change, coastal) show greyed out as "Planned" and hold no data.
 
 Layers that have not been built show as dashed tabs. The repository ships no example data.
 
