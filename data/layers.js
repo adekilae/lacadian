@@ -13,7 +13,8 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "label": "Soil moisture",
    "page": "drought",
    "file": "data/soil.json",
-   "built": false
+   "built": true,
+   "updated": "2026-10-20"
   },
   {
    "key": "dryspell",
