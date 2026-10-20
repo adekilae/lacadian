@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import BOUNDARY_CREDIT, MON, WETNESS, load_parishes, pct_rank, wetness_category, write_layer  # noqa: E402
+from common import write_months, BOUNDARY_CREDIT, MON, WETNESS, load_parishes, pct_rank, wetness_category, write_layer  # noqa: E402
 
 BUILD = 1
 
@@ -202,6 +202,16 @@ def build(gdf, dates, rain):
             "v": [None if (h is None or np.isnan(h[2][i]) or h[1][i] <= 0) else round(float(h[0][i] / h[1][i] * 100 - 100), 1) for h in hist],
             "c": ["not_rated" if (h is None or np.isnan(h[2][i])) else wetness_category(h[2][i]) for h in hist],
         }
+    rows_m = []
+    for e in ends:
+        r = assess(tot, e)
+        if r is None:
+            continue
+        _, _, pc, pt, _ = r
+        yy, mm = ym_of(e)
+        rows_m.append((f"{yy}-{mm:02d}", month_label(e), list(pc), [None if np.isnan(x) else wetness_category(x) for x in pt]))
+    write_months("rain", list(gdf["id"]), rows_m, [c["key"] for c in cats], "not_rated", "against the same months in 1991–2020",
+                 "{v}%", "of normal rainfall, {label}", "{cat} · {v}% of normal", "Rain as % of normal")
     write_layer("rain", {
         "label": "Rainfall", "title": "Rainfall compared with normal", "subtitle": f"{label}, against the same months in 1991–2020",
         "source": "gridMET daily precipitation, averaged by parish", "demo": False, "build": BUILD, "categories": cats,

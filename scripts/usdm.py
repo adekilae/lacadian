@@ -32,6 +32,7 @@ BUILD = 1
 
 # ---- settings you may want to change -------------------------------------
 STATE = "LA"
+HISTORY_YEARS = 5                  # years of weekly maps kept for the month picker
 WEEKS = 14                         # weeks requested (12 are drawn in the chart)
 SHARE = 25.0                       # a category colours a parish when it covers at least this % of the parish
 ENDPOINT = "https://usdmdataservices.unl.edu/api/CountyStatistics/GetDroughtSeverityStatisticsByAreaPercent"
@@ -49,6 +50,7 @@ CATEGORIES = [
 NAMES = {c["key"]: c["label"] for c in CATEGORIES}
 COLORS = {c["key"]: c["color"] for c in CATEGORIES}
 LEVELS = ["d0", "d1", "d2", "d3", "d4"]
+MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
 def parse(text):
@@ -93,13 +95,38 @@ def category(cum):
     return "none"
 
 
-def fetch():
-    end = dt.date.today()
-    start = end - dt.timedelta(weeks=WEEKS)
+def fetch_range(start, end):
     url = (f"{ENDPOINT}?aoi={STATE}&startdate={start.month}/{start.day}/{start.year}"
            f"&enddate={end.month}/{end.day}/{end.year}&statisticsType=1")
-    r = get_url(url, tries=4, timeout=180, headers={"Accept": "application/json"})
-    return parse(r.text)
+    return parse(get_url(url, tries=4, timeout=180, headers={"Accept": "application/json"}).text)
+
+
+def fetch():
+    """Recent weeks (must work) plus earlier calendar years for the month-by-month maps (kept in cache/, never needed again)."""
+    from common import CACHE
+    today = dt.date.today()
+    recs = fetch_range(today - dt.timedelta(weeks=WEEKS), today)
+    CACHE.mkdir(exist_ok=True)
+    for y in range(today.year - HISTORY_YEARS + 1, today.year + 1):
+        cf = CACHE / f"usdm_{y}.json"
+        if y < today.year and cf.exists():
+            recs += json.loads(cf.read_text())
+            continue
+        try:
+            part = fetch_range(dt.date(y, 1, 1), min(dt.date(y, 12, 31), today))
+        except Exception as e:
+            print(f"  {y}: could not be downloaded ({type(e).__name__}); skipped")
+            continue
+        if y < today.year and part:
+            cf.write_text(json.dumps(part))
+        recs += part
+    seen, out = set(), []
+    for r in recs:
+        k = (r["date"], r["fips"])
+        if k not in seen:
+            seen.add(k)
+            out.append(r)
+    return out
 
 
 def self_test():
@@ -132,13 +159,9 @@ def main():
     build(load_parishes(), recs)
 
 
-def build(gdf, recs):
-    weeks = sorted({r["date"] for r in recs})
-    latest = weeks[-1]
+def make_payload(gdf, by, weeks, latest):
+    """The layer for the week `latest`; `weeks` are all weeks up to and including it."""
     chart_weeks = weeks[-12:]
-    by = {}
-    for r in recs:
-        by[(r["fips"], r["date"])] = cumulative(r)
     when = dt.date.fromisoformat(latest)
     parishes = {}
     for i, row in gdf.iterrows():
@@ -164,8 +187,7 @@ def build(gdf, recs):
             "bc": ["#b8c4bd" if h is None else COLORS[category(h)] for h in hist],
         }
     n_drought = sum(1 for p in parishes.values() if p["cat"] in LEVELS)
-    print(f"map of {latest}: {n_drought} of {len(gdf)} parishes coloured")
-    write_layer("usdm", {
+    payload = {
         "label": "Drought Monitor", "title": "US Drought Monitor",
         "subtitle": f"Weekly map valid {when.day} {when:%b %Y}, official US drought categories",
         "source": "US Drought Monitor, National Drought Mitigation Center (University of Nebraska-Lincoln), USDA and NOAA", "demo": False, "build": BUILD,
@@ -184,7 +206,27 @@ def build(gdf, recs):
         "chart": {"kind": "bars", "unit": "%", "x": [f"{int(w[8:])} {dt.date.fromisoformat(w):%b}" for w in chart_weeks],
                   "caption": "Share of the parish in D1 or worse, last 12 weeks", "top": "", "bottom": ""},
         "parishes": parishes,
-    })
+    }
+    return payload, n_drought
+
+
+def build(gdf, recs):
+    weeks = sorted({r["date"] for r in recs})
+    by = {(r["fips"], r["date"]): cumulative(r) for r in recs}
+    payload, n_drought = make_payload(gdf, by, weeks, weeks[-1])
+    print(f"map of {weeks[-1]}: {n_drought} of {len(gdf)} parishes coloured")
+    write_layer("usdm", payload)
+    # one map for each earlier month: the last weekly map of that month
+    last = {}
+    for w in weeks:
+        last[w[:7]] = w
+    n = 0
+    for ym, w in sorted(last.items()):
+        pl, _ = make_payload(gdf, by, [x for x in weeks if x <= w], w)
+        y, m = int(ym[:4]), int(ym[5:7])
+        write_layer("usdm", pl, period=ym, period_label=f"{MONTHS[m - 1]} {y}")
+        n += 1
+    print(f"Wrote {n} month-by-month maps")
 
 
 if __name__ == "__main__":

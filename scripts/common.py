@@ -189,14 +189,20 @@ def _write_pair(path_json, obj, compact=True):
     path_json.with_suffix(".js").write_text(f'window.__LC=window.__LC||{{}};window.__LC["{rel}"]={text};')
 
 
-def write_layer(key, payload):
-    """Save data/<key>.json (+ .js) and refresh data/layers.json (the list of tabs)."""
+def write_layer(key, payload, period=None, period_label=None):
+    """Save data/<key>.json (+ .js) and refresh data/layers.json (the list of tabs).
+    With period (for example "2024" or "2024-09"), save an earlier version as data/<key>@<period>.json instead."""
     payload = {"key": key, "updated": dt.date.today().isoformat(), **payload}
     counts = {}
     for d in payload["parishes"].values():
         counts[d["cat"]] = counts.get(d["cat"], 0) + 1
     payload["counts"] = counts
     DATA.mkdir(exist_ok=True)
+    if period:
+        payload["period"] = period
+        payload["period_label"] = period_label or period
+        _write_pair(DATA / f"{key}@{period}.json", payload)
+        return
     _write_pair(DATA / f"{key}.json", payload)
     write_manifest()
     print(f"Wrote data/{key}.json: {len(payload['parishes'])} parishes, {counts}")
@@ -208,13 +214,35 @@ def write_json(name, obj):
     _write_pair(DATA / name, obj)
 
 
+def write_months(key, parish_ids, rows, cat_keys, fallback, basis, big, note, tip, value_label):
+    """Save data/<key>_months.json: the layer's indicator for every month in its record, so the site can show or download any month.
+
+    rows: [(month 'YYYY-MM', label text, values per parish (percent of normal, or None/NaN), category key per parish (or None))]
+    cat_keys: every category key a month can have; `fallback` is used where a parish has no category.
+    big / note / tip: text templates with {v}, {label}, {cat} filled in by the page."""
+    parishes = {}
+    for j, pid in enumerate(parish_ids):
+        v, k = [], []
+        for _, _, vals, cats in rows:
+            x = vals[j]
+            v.append(None if x is None or x != x else int(round(float(x))))
+            k.append(cat_keys.index(cats[j] or fallback))
+        parishes[pid] = {"v": v, "k": k}
+    write_json(f"{key}_months.json", {
+        "key": key, "months": [r[0] for r in rows], "labels": [r[1] for r in rows], "cats": cat_keys, "basis": basis,
+        "big": big, "note": note, "tip": tip, "value_label": value_label, "parishes": parishes})
+    print(f"Wrote data/{key}_months.json: {len(rows)} months")
+
+
 def write_manifest():
     out = []
     for key, label, page, grp in LAYERS:
         f = DATA / f"{key}.json"
-        item = {"key": key, "label": label, "page": page, "file": f"data/{key}.json", "built": f.exists()}
+        item = {"key": key, "label": label, "page": page, "file": f"data/{key}.json", "built": f.exists(),
+                "months": (DATA / f"{key}_months.json").exists()}
         if grp:
             item.update({"group": grp[0], "group_tab": grp[1], "group_label": grp[2]})
+        item["periods"] = sorted((x.name[len(key) + 1:-5] for x in DATA.glob(f"{key}@*.json")), reverse=True)
         if f.exists():
             try:
                 item["updated"] = json.loads(f.read_text()).get("updated")

@@ -29,7 +29,7 @@ from rasterio.features import rasterize
 from rasterio.transform import Affine
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import BBOX, BOUNDARY_CREDIT, CACHE, MON, WETNESS, load_parishes, wetness_category, write_json, write_layer, ym_text  # noqa: E402
+from common import write_months, BBOX, BOUNDARY_CREDIT, CACHE, MON, WETNESS, load_parishes, wetness_category, write_json, write_layer, ym_text  # noqa: E402
 
 BUILD = 1
 
@@ -319,6 +319,13 @@ def build(gdf, have, total, tiles, source):
         "values": {"ndvi": {row["id"]: [None if np.isnan(v) else round(float(v), 4) for v in ndvi[:, i]] for i, row in gdf.iterrows()}},
     })
 
+    rows_m = []
+    for t in range(len(months)):
+        cur_t, _, pc, pt, _ = assess(months, ndvi, t)
+        cs = [wetness_category(pt[i]) if not np.isnan(pt[i]) else ("few" if not np.isnan(cur_t[i]) else "cloud") for i in range(len(pt))]
+        rows_m.append((f"{months[t][0]}-{months[t][1]:02d}", ym_text(f"{months[t][0]}-{months[t][1]:02d}"), [x if not np.isnan(pt[i]) else None for i, x in enumerate(pc)], cs))
+    write_months("vegetation", list(gdf["id"]), rows_m, [c["key"] for c in cats], "cloud", "against the same month in earlier years since 2012",
+                 "{v}%", "of normal greenness, {label}", "{cat} · {v}% of normal", "Greenness (NDVI) as % of normal")
     write_layer("vegetation", {
         "label": "Vegetation", "title": "Vegetation greenness compared with normal",
         "subtitle": f"{ym_text(label)}, against {MON[m - 1]} in earlier years since 2012",

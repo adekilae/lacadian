@@ -11,6 +11,7 @@ Maps of Louisiana by parish, plus the LaCADIAN field stations. Static pages (Lea
 | Methods, About | sources, limits, status |
 
 Layers built so far: rainfall, soil moisture (SMAP), dry spells, Drought Monitor, cropland, main crops, 9 single-crop maps, soil pH, organic matter, clay, sand, bulk density, drainage, vegetation, flood risk, surface water change.
+Rainfall, soil moisture and vegetation also keep a monthly record (`data/<layer>_months.json`), so any past month can be shown, downloaded (CSV, JSON) and saved as a PNG from the Map page.
 Planned layers (air temperature, ET0, the pCC root-zone model, drought onset and gap, crop water stress, streamflow, recharge, land-cover change, coastal) show greyed out as "Planned" and hold no data.
 
 Layers that have not been built show as dashed tabs. The repository ships no example data.
@@ -31,3 +32,6 @@ Double-click `index.html`, or `python -m http.server 8000` and open http://local
 
 ## Status
 Prototype. Ownership, name and licence are to be settled with the LaCADIAN network team. Not for farm decisions.
+
+## Past periods
+Rainfall, soil moisture and vegetation keep a month-by-month record (`data/<layer>_months.json`). Crops keep one saved version per year (`<layer>@2021.json` ...) and the Drought Monitor keeps one per month for the last five years (`usdm@2025-06.json` ...). Pick a year and month on the map page or in the download card. One run of Actions builds all of them.

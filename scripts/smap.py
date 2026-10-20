@@ -28,7 +28,7 @@ import geopandas as gpd
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import BBOX, BOUNDARY_CREDIT, CACHE, MON, WETNESS, load_parishes, wetness_category, write_json, write_layer, ym_text  # noqa: E402
+from common import write_months, BBOX, BOUNDARY_CREDIT, CACHE, MON, WETNESS, load_parishes, wetness_category, write_json, write_layer, ym_text  # noqa: E402
 
 BUILD = 1
 
@@ -308,6 +308,16 @@ def build(gdf, have, lat, lon, source, today):
     })
     print(f"Wrote data/soil_history.json: {len(months)} months")
 
+    rows_m = []
+    for t in range(len(months)):
+        r = assess(months, root, t)
+        if r is None:
+            continue
+        _, _, pc, pt, _ = r
+        rows_m.append((f"{months[t][0]}-{months[t][1]:02d}", ym_text(f"{months[t][0]}-{months[t][1]:02d}"), list(pc),
+                       [None if np.isnan(x) else wetness_category(x) for x in pt]))
+    write_months("soil", list(gdf["id"]), rows_m, [c["key"] for c in cats], "not_rated", "against the same month in earlier years since 2015",
+                 "{v}%", "of normal root-zone soil moisture, {label}", "{cat} · {v}% of normal", "Root-zone soil moisture as % of normal")
     write_layer("soil", {
         "label": "Soil moisture", "title": "Root-zone soil moisture compared with normal",
         "subtitle": f"{ym_text(label)}, against {MON[m - 1]} in {n} earlier years",

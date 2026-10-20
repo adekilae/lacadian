@@ -44,6 +44,7 @@
           <div class="status" id="status"></div>
           <h2 class="maptitle" id="title">Loading…</h2>
           <p class="sub" id="subtitle"></p>
+          <div class="period" id="periodbar" hidden><label for="pYear">Period</label><select id="pYear" aria-label="Year"></select><select id="pMonth" aria-label="Month" hidden></select><span class="sub" id="pNote" style="margin:0"></span></div>
           <div class="mapbox"><div id="map" role="application" aria-label="Map of Louisiana parishes"></div>
             <div class="maptoggle seg" role="group" aria-label="Background"><button type="button" id="bm-map" aria-pressed="true">Map</button><button type="button" id="bm-sat" aria-pressed="false">Satellite</button></div></div>
           <ul class="lnotes" id="lnotes"></ul>
@@ -68,20 +69,21 @@
       <section class="card"><div class="cardhead"><h2>Related layers</h2></div><div class="rel" id="relBody"></div></section>
       <section class="card"><div class="cardhead"><h2>Download data</h2></div>
         <div class="fld"><label for="dlLayer">Layer</label><select id="dlLayer"></select></div>
-        <div class="fld"><label for="dlFmt">Format</label><select id="dlFmt"><option value="csv">CSV (table)</option><option value="json">JSON (full layer)</option></select></div>
+        <div class="fld"><label for="dlFmt">Format</label><select id="dlFmt"><option value="csv">CSV (table)</option><option value="json">JSON (full layer)</option><option value="png">PNG (map image)</option></select></div>
         <div class="fld"><label>Area</label><span>Louisiana, all 64 parishes</span></div>
-        <div class="fld"><label>Period</label><span>Latest update (<span id="dlDate">n/a</span>)</span></div>
+        <div class="fld"><label for="dlYear">Period</label><span class="two"><select id="dlYear" aria-label="Year"></select><select id="dlMonth" aria-label="Month" hidden></select></span></div>
         <button class="btn primary" id="dlGo" type="button" style="width:100%;margin-top:6px">Download data</button></section>
     </div>
     <section class="card notes"><h2>How to read this map</h2><p id="how"></p><h2>Limits</h2><ul id="limits"></ul><h2>Credits</h2><ul id="credits"></ul></section>
     <section class="card notes" id="validation" hidden></section>`;
 
   // ------------------------------------------------------------ state
-  let MAN, GJ, DATA = {}, cur = null, sel = null, tab = 0, tsKey = null, cmpA = "", cmpB = "", rankHigh = true;
+  let MAN, GJ, DATA = {}, VIEW = null, PS = null, DLS = null, cur = null, sel = null, tab = 0, tsKey = null, cmpA = "", cmpB = "", rankHigh = true;
   let STN = null, stnGroup = null, SAT = false, VAL;
   const PROMISES = {};
   const shapes = {};
   let geo, map, legendCtl;
+  const V = () => VIEW || DATA[cur];
   const layerMeta = k => MAN.layers.find(l => l.key === k);
   const catOf = k => { const c = CATS.find(c => c.items.some(i => i.k === k || (i.keys && i.keys.includes(k)))); return c ? c.id : null; };
   const nameOf = id => { const f = GJ.features.find(f => f.properties.id === id); return f ? f.properties.name : id; };
@@ -125,7 +127,7 @@
 
   // ------------------------------------------------------------ map
   function styleFor(id) {
-    const D = DATA[cur], p = D && D.parishes[id], col = p ? (CH.maps(D).color[p.cat] || "#bdbdbd") : "#d9d9d9";
+    const D = V(), p = D && D.parishes[id], col = p ? (CH.maps(D).color[p.cat] || "#bdbdbd") : "#d9d9d9";
     return { fillColor: col, fillOpacity: opacity(), color: id === sel ? "#111" : (SAT ? "#fff" : "#55605c"), weight: id === sel ? 3 : 0.7 };
   }
   function restyle() { Object.entries(shapes).forEach(([id, l]) => { l.setStyle(styleFor(id)); if (id === sel) l.bringToFront(); }); }
@@ -145,7 +147,7 @@
       style: f => styleFor(f.properties.id),
       onEachFeature: (f, l) => {
         shapes[f.properties.id] = l;
-        l.bindTooltip(() => { const p = DATA[cur] && DATA[cur].parishes[f.properties.id]; return esc(f.properties.name) + " Parish" + (p ? "<br><b>" + esc(p.tip || p.big) + "</b>" : ""); }, { sticky: true });
+        l.bindTooltip(() => { const p = V() && V().parishes[f.properties.id]; return esc(f.properties.name) + " Parish" + (p ? "<br><b>" + esc(p.tip || p.big) + "</b>" : ""); }, { sticky: true });
         l.on("click", () => select(f.properties.id));
       },
     }).addTo(map);
@@ -160,24 +162,69 @@
   }
 
   // ------------------------------------------------------------ showing a layer
-  function setHash() { history.replaceState(null, "", "#layer=" + cur + (sel ? "&parish=" + sel : "")); }
-  function show(key) {
+  function setHash() { history.replaceState(null, "", "#layer=" + cur + (sel ? "&parish=" + sel : "") + (VIEW ? "&period=" + VIEW.period : "")); }
+  function show(key, ym) {
     load(key).then(D => {
-      cur = key; render(D); markSide(); setHash();
+      cur = key; VIEW = null; PS = null;
+      render(D); markSide(); setHash(); dlSet(key);
+      periodBar(ym);
     }).catch(() => { $("title").textContent = "This layer could not be loaded"; });
   }
+
+  // ---- choosing a past period (months file, or saved versions: see periods.js)
+  function monthOptions(src, year, selected) {
+    return src.months(year).map(x => `<option value="${esc(x.v)}"${x.v === selected ? " selected" : ""}>${esc(x.label)}</option>`).join("");
+  }
+  function periodBar(ym) {
+    const bar = $("periodbar"), m = layerMeta(cur), key = cur;
+    PS = null;
+    if (!m || !(m.months || (m.periods && m.periods.length))) { bar.hidden = true; return; }
+    LC.periods.source(m, DATA[key]).then(src => {
+      if (cur !== key || !src) { if (!src) bar.hidden = true; return; }
+      PS = src;
+      $("pYear").innerHTML = `<option value="">Latest</option>` + src.years.map(y => `<option value="${y}">${y}</option>`).join("");
+      $("pMonth").hidden = true; $("pNote").textContent = "";
+      bar.hidden = false;
+      const v = ym ? src.find(ym) : null;
+      if (v != null) {
+        const year = ym.slice(0, 4);
+        $("pYear").value = year;
+        if (src.months(year).length) { $("pMonth").innerHTML = monthOptions(src, year, v); $("pMonth").hidden = false; }
+        setPeriod(v);
+      }
+    }).catch(() => { bar.hidden = true; });
+  }
+  function setPeriod(v) {
+    if (v == null) { VIEW = null; $("pNote").textContent = ""; render(V()); setHash(); return; }
+    const key = cur;
+    PS.fetch(v).then(X => {
+      if (cur !== key) return;
+      VIEW = X;
+      $("pNote").textContent = /–/.test(X.period_label || "") ? "Each period is the three months ending in the month shown." : (X.period && X.period.length === 7 && X.key === "usdm" ? "The last weekly map of the month." : "");
+      render(V()); setHash();
+    }).catch(() => { $("pNote").textContent = "That period could not be loaded."; });
+  }
+  $("pYear").addEventListener("change", e => {
+    if (!PS) return;
+    const y = e.target.value;
+    if (!y) { $("pMonth").hidden = true; setPeriod(null); return; }
+    const list = PS.months(y);
+    if (!list.length) { $("pMonth").hidden = true; setPeriod(PS.single(y)); return; }
+    $("pMonth").innerHTML = monthOptions(PS, y, list[list.length - 1].v); $("pMonth").hidden = false; setPeriod(list[list.length - 1].v);
+  });
+  $("pMonth").addEventListener("change", e => setPeriod(e.target.value));
   function render(D) {
     const { color } = CH.maps(D);
     $("title").textContent = D.title;
     $("subtitle").textContent = D.subtitle || "";
-    $("status").innerHTML = `<span class="pill">Updated ${esc(niceDate(D.updated))}</span>` + (D.demo ? ' <span class="pill warn">Demo data</span>' : "");
+    $("status").innerHTML = (D.period ? `<span class="pill">Period: ${esc(D.period_label)}</span>` : `<span class="pill">Updated ${esc(niceDate(D.updated))}</span>`) + (D.demo ? ' <span class="pill warn">Demo data</span>' : "");
     const rows = D.categories.filter(c => (D.counts[c.key] || 0) > 0 || !/^(not_rated|none|cloud|few)$/.test(c.key));
     $("lgctl").innerHTML = `<b class="h">${esc(D.label)}</b>` + rows.map(c => `<div class="row"><span class="sw" style="background:${esc(c.color)}"></span><span>${esc(c.label)}</span><span class="cnt">${D.counts[c.key] || 0}</span></div>`).join("");
     $("lnotes").innerHTML = (D.legend_notes || []).map(t => `<li>${esc(t)}</li>`).join("");
     $("how").textContent = D.how || "";
     $("limits").innerHTML = (D.limits || []).map(t => `<li>${esc(t)}</li>`).join("");
     $("credits").innerHTML = (D.credits || []).map(c => `<li>${c.url ? `<a href="${esc(c.url)}" rel="noopener">${esc(c.text)}</a>` : esc(c.text)}</li>`).join("");
-    $("cite").textContent = `LaCADIAN Environmental Intelligence (unofficial prototype), ${new Date(D.updated).getFullYear()}. ${D.title}: ${D.subtitle || ""}. Source: ${D.source}. Updated ${D.updated}.`;
+    $("cite").textContent = `LaCADIAN Environmental Intelligence (unofficial prototype), ${new Date(D.period ? D.period + "-01" : D.updated).getFullYear()}. ${D.title}: ${D.subtitle || ""}. Source: ${D.source}. ${D.period ? "Period " + D.period_label : "Updated " + D.updated}.`;
     restyle(); ranking(); validation(D); bottom();
     if (sel) pinfo();
   }
@@ -209,8 +256,8 @@
       }).join("");
       if (plain) h += `<h3>In plain words</h3><ul class="plain">${plain}</ul><p class="sub" style="margin-top:6px">Each line is the value on that layer's map, as measured or mapped. It is not advice.</p>`;
       h += `<p style="margin:12px 0 0"><a class="btn primary" href="pages/parish.html#${esc(sel)}">View full parish report</a></p>`;
-      if (DATA[cur] && DATA[cur].parishes[sel]) {
-        const D = DATA[cur], p = D.parishes[sel];
+      if (V() && V().parishes[sel]) {
+        const D = V(), p = D.parishes[sel];
         h += `<h3>${esc(D.label)} on the map</h3><p class="big"><span class="chip" style="background:${esc(CH.maps(D).color[p.cat] || "#bdbdbd")}"></span>${esc(p.big)}</p><p class="sub">${esc(p.big_note || "")}</p>`;
         if (p.rows && p.rows.length) h += `<dl class="kv">${p.rows.map(r => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl>`;
         if (p.table) h += CH.tableHtml(p.table);
@@ -227,7 +274,7 @@
 
   // ------------------------------------------------------------ ranking
   function ranking() {
-    const D = DATA[cur];
+    const D = V();
     const has = D && D.rank && Object.values(D.parishes).some(p => p.rv != null);
     $("rankcard").hidden = !has;
     if (!has) return;
@@ -254,7 +301,7 @@
     const body = $("tsBody"); body.innerHTML = "";
     if (!tsKey) { body.innerHTML = `<p class="sub">No chart data yet.</p>`; return; }
     if (!sel) { body.innerHTML = `<p class="sub" style="margin-top:8px">Select a parish to see its chart.</p>`; return; }
-    const D = DATA[tsKey], p = D.parishes[sel], box = p && CH.chartBox(D, p);
+    const D = tsKey === cur ? V() : DATA[tsKey], p = D.parishes[sel], box = p && CH.chartBox(D, p);
     if (box) { body.appendChild(box); const s = document.createElement("p"); s.className = "sub"; s.textContent = `${D.source}. Updated ${D.updated}.`; body.appendChild(s); }
     else body.innerHTML = `<p class="sub" style="margin-top:8px">No chart for this parish on this layer.</p>`;
   }
@@ -267,7 +314,7 @@
     if (sel && cmp.lastSel !== sel) { cmpA = sel; cmp.lastSel = sel; if (cmpB === cmpA) cmpB = cmpA === "22055" ? "22033" : "22055"; }
     const opts = v => names.map(p => `<option value="${p.id}"${p.id === v ? " selected" : ""}>${esc(p.name)}</option>`).join("");
     $("cmpA").innerHTML = opts(cmpA); $("cmpB").innerHTML = opts(cmpB);
-    const D = DATA[cur], body = $("cmpBody");
+    const D = V(), body = $("cmpBody");
     if (!D) { body.innerHTML = ""; return; }
     const mx = Math.max.apply(null, Object.values(D.parishes).map(p => p.rv).filter(v => v != null).concat([0]));
     body.innerHTML = [cmpA, cmpB].map((id, i) => {
@@ -293,17 +340,46 @@
   $("relBody").addEventListener("click", e => { const b = e.target.closest("[data-k]"); if (b) show(b.dataset.k); });
 
   function dl() {
-    const built = MAN.layers.filter(l => l.built);
-    const keep = $("dlLayer").value || cur;
-    $("dlLayer").innerHTML = built.map(l => `<option value="${l.key}"${l.key === keep ? " selected" : ""}>${esc(l.label)}</option>`).join("");
-    const m = layerMeta($("dlLayer").value); $("dlDate").textContent = m && m.updated ? niceDate(m.updated) : "n/a";
+    // the download card follows the layer on the map unless the person picks another
+    if ($("dlLayer").options.length) return;
+    $("dlLayer").innerHTML = MAN.layers.filter(l => l.built).map(l => `<option value="${l.key}">${esc(l.label)}</option>`).join("");
+    if (cur) dlSet(cur);
   }
-  $("dlLayer").addEventListener("change", dl);
+  function dlSet(key) {
+    if (!$("dlLayer").options.length) return;
+    if (Array.from($("dlLayer").options).some(o => o.value === key)) $("dlLayer").value = key;
+    dlPeriods();
+  }
+  function dlPeriods() {
+    const k = $("dlLayer").value, m = layerMeta(k);
+    DLS = null; $("dlMonth").hidden = true;
+    const none = () => { $("dlYear").innerHTML = `<option value="">Latest only</option>`; $("dlYear").disabled = true; };
+    if (!m || !(m.months || (m.periods && m.periods.length))) { none(); return; }
+    load(k).then(D => LC.periods.source(m, D)).then(src => {
+      if ($("dlLayer").value !== k) return;
+      if (!src) { none(); return; }
+      DLS = src; $("dlYear").disabled = false;
+      $("dlYear").innerHTML = `<option value="">Latest</option>` + src.years.map(y => `<option value="${y}">${y}</option>`).join("");
+    }).catch(none);
+  }
+  $("dlLayer").addEventListener("change", dlPeriods);
+  $("dlYear").addEventListener("change", e => {
+    if (!DLS || !e.target.value) { $("dlMonth").hidden = true; return; }
+    const list = DLS.months(e.target.value);
+    if (!list.length) { $("dlMonth").hidden = true; return; }
+    $("dlMonth").innerHTML = monthOptions(DLS, e.target.value, list[list.length - 1].v); $("dlMonth").hidden = false;
+  });
   $("dlGo").addEventListener("click", () => {
     const k = $("dlLayer").value; if (!k) return;
     load(k).then(D => {
-      if ($("dlFmt").value === "json") saveText(`lacadian-${k}-${D.updated}.json`, JSON.stringify(D), "application/json");
-      else saveText(`lacadian-${k}-${D.updated}.csv`, CH.csvText(D));
+      const y = $("dlYear").value;
+      if (DLS && y !== "") return DLS.fetch($("dlMonth").hidden ? DLS.single(y) : $("dlMonth").value);
+      return D;
+    }).then(X => {
+      const stamp = X.period || X.updated, f = $("dlFmt").value;
+      if (f === "json") saveText(`lacadian-${k}-${stamp}.json`, JSON.stringify(X), "application/json");
+      else if (f === "png") CH.savePng(X, GJ);
+      else saveText(`lacadian-${k}-${stamp}.csv`, CH.csvText(X));
     });
   });
 
@@ -318,8 +394,8 @@
   }
 
   // ------------------------------------------------------------ map-side controls
-  $("download").addEventListener("click", () => { const D = DATA[cur]; if (D) saveText(`lacadian-${D.key}-${D.updated}.csv`, CH.csvText(D)); });
-  $("download-img").addEventListener("click", () => { const D = DATA[cur]; if (D) CH.savePng(D, GJ); });
+  $("download").addEventListener("click", () => { const D = V(); if (D) saveText(`lacadian-${D.key}-${D.period || D.updated}.csv`, CH.csvText(D)); });
+  $("download-img").addEventListener("click", () => { const D = V(); if (D) CH.savePng(D, GJ); });
   $("cite-copy").addEventListener("click", () => {
     const done = () => { $("cite-copy").textContent = "Copied"; setTimeout(() => $("cite-copy").textContent = "Copy citation", 1500); };
     (navigator.clipboard ? navigator.clipboard.writeText($("cite").textContent) : Promise.reject()).then(done).catch(() => {
@@ -372,11 +448,11 @@
     buildMap();
     ribbon(); pinfo();
     const q = new URLSearchParams(location.hash.slice(1).includes("=") ? location.hash.slice(1) : "layer=" + location.hash.slice(1));
-    const want = q.get("layer"), p0 = q.get("parish");
+    const want = q.get("layer"), p0 = q.get("parish"), per = q.get("period");
     if (p0 && GJ.features.some(f => f.properties.id === p0)) sel = p0;
     const first = want && layerMeta(want) && layerMeta(want).built ? want : defaultLayer();
     if (!first) { $("title").textContent = "No layers have been built yet"; $("how").textContent = "Run the update workflow once; the maps appear here after it finishes."; return; }
-    show(first);
+    show(first, first === want ? per : null);
     getData("data/stations.json").then(d => { STN = d; ribbon(); }).catch(() => {});
     Promise.allSettled(MAN.layers.filter(l => l.built).map(l => load(l.key))).then(() => { ribbon(); pinfo(); bottom(); });
   }).catch(e => { $("title").textContent = "Could not load the data files"; $("subtitle").textContent = e.message; });

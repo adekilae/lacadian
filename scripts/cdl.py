@@ -37,7 +37,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import common  # noqa: E402
 from common import BOUNDARY_CREDIT, CACHE, DATA, SOURCE, get_url, load_parishes, write_layer  # noqa: E402
 
-BUILD = 1
+BUILD = 2
 
 # ---- settings you may want to change -------------------------------------
 ENDPOINT = "https://nassgeodata.gmu.edu/axis2/services/CDLService/GetCDLStat"
@@ -175,8 +175,8 @@ def fmt_pct(x):
     return f"{x:.0f}%" if x >= 10 else (f"{x:.1f}%" if x >= 1 else f"{x:.2f}%")
 
 
-def build(gdf, stats):
-    """stats: {year: {fips: {code: acres}}}. Writes the 11 + layers."""
+def build_year(gdf, stats, emit, base):
+    """The 11 crop layers as of the last year in stats ({year: {fips: {code: acres}}}); emit(key, payload) saves each."""
     years = sorted(stats)
     latest = years[-1]
     first = years[0]
@@ -222,7 +222,7 @@ def build(gdf, stats):
                        "tip": f"{fmt_pct(s)} cropland ({crop:,.0f} acres)", "rows": rows,
                        "v": [None if share[y].get(p) is None else round(share[y][p], 2) for y in years],
                        "bc": ["#2D6A4F" if y == latest else "#b8c4bd" for y in years]}
-    write_layer("cropland", {
+    emit("cropland", {
         "label": "Cropland", "title": "Cropland: share of each parish in crops", "subtitle": f"USDA Cropland Data Layer {latest}",
         "source": f"USDA NASS Cropland Data Layer {latest}", "demo": False, "build": BUILD, "categories": cats,
         "rank": {"high": "Most cropland", "low": "Least cropland", "note": "Ranked by the share of the parish in crops."},
@@ -268,7 +268,7 @@ def build(gdf, stats):
                    "big_note": f"is the crop with the largest area in the parish in {latest}",
                    "tip": f"{NAMES[k]}, {ranked[p][0][0]:,.0f} acres", "rows": rows, "table": table,
                    "v": [round(T[latest][p][3].get(kk, 0.0), 0) for kk in chart_keys], "bc": [PALETTE[kk] if kk == k else "#b8c4bd" for kk in chart_keys]}
-    write_layer("crops", {
+    emit("crops", {
         "label": "Main crops", "title": "Main crop in each parish", "subtitle": f"The crop with the largest area, USDA Cropland Data Layer {latest}",
         "source": f"USDA NASS Cropland Data Layer {latest}", "demo": False, "build": BUILD, "categories": cats2,
         "rank": {"high": "Largest main-crop area", "low": "Smallest main-crop area", "note": "Ranked by the area of each parish's main crop, in acres."},
@@ -322,7 +322,7 @@ def build(gdf, stats):
             lim.append("CDL class 92 maps aquaculture ponds, but crawfish are often grown in flooded rice fields and in ponds the map labels as rice or water, so crawfish area is not captured well.")
         if key in ("wheat", "soy", "corn", "cotton"):
             lim.append("This crop includes double-crop classes, such as winter wheat followed by soybeans, so an acre can appear on two crop layers.")
-        write_layer(f"crop_{key}", {
+        emit(f"crop_{key}", {
             "label": name, "title": f"{name}: area by parish", "subtitle": f"Share of each parish, USDA Cropland Data Layer {latest}",
             "source": f"USDA NASS Cropland Data Layer {latest}", "demo": False, "build": BUILD, "categories": cc,
             "rank": {"high": "Most area", "low": "Least area", "note": "Ranked by acres."},
@@ -334,6 +334,8 @@ def build(gdf, stats):
         })
         print(f"  {name}: {n_pos} parishes, {total_la:,.0f} acres in Louisiana")
 
+    if not base:
+        return
     import csv as _csv
     with open(DATA / "crops-by-parish.csv", "w", newline="", encoding="utf-8") as f:
         w = _csv.writer(f)
@@ -342,6 +344,18 @@ def build(gdf, stats):
             mapped, crop, fallow, _, _ = T[latest][p]
             w.writerow([p, names[p], latest, round(mapped), round(crop), round(fallow)] + [round(acres(stats[latest][p], GROUPS[k][1])) for k in GROUPS])
     print("Wrote data/crops-by-parish.csv")
+
+
+def build(gdf, stats):
+    """Latest year -> data/<layer>.json; every year (including the latest) -> data/<layer>@<year>.json for the year picker."""
+    years = sorted(stats)
+    for y in years:
+        part = {yy: stats[yy] for yy in years if yy <= y}
+        def emit(key, payload, y=y):
+            write_layer(key, payload, period=str(y), period_label=str(y))
+            if y == years[-1]:
+                write_layer(key, payload)
+        build_year(gdf, part, emit, base=(y == years[-1]))
 
 
 def pick_years(gdf, today):
