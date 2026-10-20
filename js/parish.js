@@ -9,7 +9,7 @@
     ["Soil & hydrology", ["soil", "soilsurf", "soildef", "soilgap"]],
     ["Drought", ["usdm", "usdm_onset"]],
     ["Agriculture & vegetation", ["cropland", "crops", "crop_rice", "crop_cane", "crop_soy", "crop_corn", "crop_cotton", "crop_sweetpotato", "crop_wheat", "crop_pasture", "crop_aqua", "vegetation", "soilph", "soilom", "soilclay", "soilsand", "soilbd", "soildrain"]],
-    ["Water & flooding", ["flood", "water"]],
+    ["Water & flooding", ["flood", "water", "streamflow"]],
     ["Land cover", ["landcover"]],
   ];
   const PLAIN = ["rain", "soil", "usdm", "dryspell", "vegetation", "flood", "water"];
@@ -58,7 +58,7 @@
     const f = GJ.features.find(f => f.properties.id === id).properties;
     const built = Object.keys(DATA).length;
     const head = document.createElement("div");
-    head.innerHTML = `<h2 style="margin-top:18px;font-size:1.5rem">${esc(f.name)} Parish</h2><p class="meta">Land area ${Math.round(f.land_sqmi).toLocaleString()} sq mi · FIPS ${esc(id)} · report built from ${built} map layer${built === 1 ? "" : "s"}</p>`;
+    head.innerHTML = `<h2 style="margin-top:18px;font-size:1.5rem">${esc(f.name)} Parish</h2><p class="meta">Land area ${Math.round(f.land_sqmi).toLocaleString()} sq mi, FIPS ${esc(id)} · report built from ${built} map layer${built === 1 ? "" : "s"}</p>`;
     rep.appendChild(head);
     const plain = PLAIN.filter(k => DATA[k] && DATA[k].parishes[id]).map(k => {
       const D = DATA[k], p = D.parishes[id];

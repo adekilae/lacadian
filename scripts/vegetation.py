@@ -307,7 +307,7 @@ def build(gdf, have, total, tiles, source):
             "big_note": (f"of normal greenness, {ym_text(label)}" if rated
                          else f"Fewer than {MIN_REF_YEARS} other years with a value for this month, so it is not rated." if has_value
                          else "Too few cloud-free land pixels this month to rate this parish."),
-            "tip": f"{names[cat]} · {pct[i]:.0f}% of normal" if rated else ("Not enough years to rate" if has_value else "Too cloudy to rate"),
+            "tip": f"{names[cat]}, {pct[i]:.0f}% of normal" if rated else ("Not enough years to rate" if has_value else "Too cloudy to rate"),
             "rows": rows,
             "v": [None if np.isnan(h[2][i]) else round(float(h[2][i] - 100), 1) for h in hist],
             "c": ["cloud" if np.isnan(h[3][i]) else wetness_category(h[3][i]) for h in hist],
@@ -325,21 +325,19 @@ def build(gdf, have, total, tiles, source):
         cs = [wetness_category(pt[i]) if not np.isnan(pt[i]) else ("few" if not np.isnan(cur_t[i]) else "cloud") for i in range(len(pt))]
         rows_m.append((f"{months[t][0]}-{months[t][1]:02d}", ym_text(f"{months[t][0]}-{months[t][1]:02d}"), [x if not np.isnan(pt[i]) else None for i, x in enumerate(pc)], cs))
     write_months("vegetation", list(gdf["id"]), rows_m, [c["key"] for c in cats], "cloud", "against the same month in earlier years since 2012",
-                 "{v}%", "of normal greenness, {label}", "{cat} · {v}% of normal", "Greenness (NDVI) as % of normal")
+                 "{v}%", "of normal greenness, {label}", "{cat}, {v}% of normal", "Greenness (NDVI) as % of normal")
     write_layer("vegetation", {
         "label": "Vegetation", "title": "Vegetation greenness compared with normal",
         "subtitle": f"{ym_text(label)}, against {MON[m - 1]} in earlier years since 2012",
         "source": source, "demo": False, "build": BUILD, "categories": cats,
         "rank": {"high": "Greenest compared with normal", "low": "Least green compared with normal", "note": "Ranked by NDVI as a percentage of normal."},
-        "how": (f"Each parish shows how green its vegetation was in {ym_text(label)}, compared with {MON[m - 1]} in each "
-                "earlier year since 2012. Greenness is measured by NDVI, a satellite index that rises with the amount of "
-                "healthy green leaves. \"Much less green\" means this year ranks in the lowest 10% of those years."),
+        "how": (f"How green the vegetation was in {ym_text(label)} compared with {MON[m - 1]} in each earlier year since 2012. Greenness is NDVI, a satellite index that goes up with the amount of healthy green leaf. \"Much less green\" means this year is in the lowest 10% of those years."),
         "limits": [
-            "Greenness covers all vegetation: crops, grass, forest and marsh. A low value can come from dry weather, late planting, flooding, harvest, clearing or a freeze.",
-            f"Clouds hide the ground, and coastal parishes include open water. A parish is not rated when under {MIN_USABLE * 100:.0f}% of its pixels were usable that month.",
-            "The grid is about 1 km, so it suits parish averages, not individual fields.",
-            "The record starts in 2012, so \"normal\" rests on about a dozen years.",
-            "The monthly file is published about six weeks after the month ends.",
+            "It covers all vegetation (crops, grass, forest, marsh). A low value can come from dry weather, late planting, flooding, harvest, clearing or a freeze.",
+            f"Clouds hide the ground and coastal parishes include open water. A parish is left unrated when under {MIN_USABLE * 100:.0f}% of its pixels were usable.",
+            "The grid is about 1 km, so it works for parish averages and not for fields.",
+            "The record starts in 2012, so normal is based on about a dozen years.",
+            "The monthly file comes out about six weeks after the month ends.",
         ],
         "credits": [{"text": "Vegetation: NASA VIIRS VNP13A3, LP DAAC", "url": "https://lpdaac.usgs.gov/products/vnp13a3v002/"}, BOUNDARY_CREDIT],
         "chart": {"kind": "diverging", "cap": 30, "unit": "% vs normal", "x": [MON[months[t][1] - 1] for t in steps],

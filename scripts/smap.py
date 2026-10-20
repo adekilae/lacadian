@@ -287,7 +287,7 @@ def build(gdf, have, lat, lon, source, today):
             "name": row["name"], "cat": cat, "rv": round(float(pct[i]), 1),
             "big": f"{pct[i]:.0f}%",
             "big_note": f"of normal root-zone soil moisture, {ym_text(label)}",
-            "tip": f"{names[cat]} · {pct[i]:.0f}% of normal",
+            "tip": f"{names[cat]}, {pct[i]:.0f}% of normal",
             "rows": [
                 ["Root zone (0–100 cm)", f"{cur[i]:.2f} m³/m³"],
                 [f"Normal for {MON[m - 1]}", f"{normal[i]:.2f} m³/m³"],
@@ -317,22 +317,20 @@ def build(gdf, have, lat, lon, source, today):
         rows_m.append((f"{months[t][0]}-{months[t][1]:02d}", ym_text(f"{months[t][0]}-{months[t][1]:02d}"), list(pc),
                        [None if np.isnan(x) else wetness_category(x) for x in pt]))
     write_months("soil", list(gdf["id"]), rows_m, [c["key"] for c in cats], "not_rated", "against the same month in earlier years since 2015",
-                 "{v}%", "of normal root-zone soil moisture, {label}", "{cat} · {v}% of normal", "Root-zone soil moisture as % of normal")
+                 "{v}%", "of normal root-zone soil moisture, {label}", "{cat}, {v}% of normal", "Root-zone soil moisture as % of normal")
     write_layer("soil", {
         "label": "Soil moisture", "title": "Root-zone soil moisture compared with normal",
         "subtitle": f"{ym_text(label)}, against {MON[m - 1]} in {n} earlier years",
         "source": source, "demo": False, "build": BUILD, "categories": cats, "validation": "soil",
         "rank": {"high": "Wettest compared with normal", "low": "Driest compared with normal", "note": "Ranked by soil moisture as a percentage of normal."},
-        "how": ("Each parish shows the average moisture in the top metre of soil for the month shown, compared with the "
-                "same month in every other year since 2015. \"Very dry\" means that month ranks in the driest 10% of "
-                "those years, \"dry\" in the driest 30%, and the same in reverse for \"wet\" and \"very wet\"."),
+        "how": ("Average soil moisture in the top metre of soil for the month, compared with the same month in every year since 2015. A parish is \"very dry\" when the month is among the driest 10% of those years and \"dry\" when it is among the driest 30%. Wet works the other way."),
         "limits": [
-            "The values come from NASA's SMAP Level-4 product, which blends satellite observations into a land model. It is an estimate, not a direct measurement at depth.",
-            f"The SMAP record starts in 2015, so \"normal\" rests on only {n} earlier years. Rankings are coarser than for rainfall.",
-            "The grid is about 9 km. It suits parish averages, not individual fields, and small parishes rest on one or two grid cells.",
-            "Over forest, marsh and open water the satellite signal is weak, so values there lean more on the model. Parishes along the coast include a lot of water and wetland.",
-            f"Each month is sampled on up to {len(SAMPLE_DAYS)} days at one time of day, not averaged over every hour.",
-            "The 'Check against the stations' table under the map compares SMAP with the LaCADIAN soil sensors. The stations record only 6 to 21 months, so that check is limited.",
+            "The values come from NASA SMAP Level 4, which feeds satellite readings into a land model. They are modelled estimates of moisture at depth, not direct measurements.",
+            f"The record starts in 2015, so normal is based on {n} earlier years and the rankings are coarse.",
+            "The grid is about 9 km. It works for parish averages and not for single fields, and small parishes rest on one or two cells.",
+            "Satellite readings are weak over forest, marsh and open water, so coastal values lean more on the model.",
+            f"Each month uses up to {len(SAMPLE_DAYS)} sample days at one time of day, not every hour.",
+            "The table under the map compares SMAP with the station soil sensors. Those only go back 6 to 21 months, so the check is limited.",
         ],
         "credits": [{"text": "Soil moisture: NASA SMAP L4 (SPL4SMGP), NSIDC DAAC", "url": "https://nsidc.org/data/spl4smgp"}, BOUNDARY_CREDIT],
         "chart": {"kind": "diverging", "cap": 50, "unit": "% vs normal",

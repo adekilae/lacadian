@@ -194,7 +194,7 @@
     var h = el("h2", null, s.name);
     if (s.stale) h.appendChild(el("span", "badge", "No recent data"));
     p.appendChild(h);
-    p.appendChild(el("p", "sub", s.id + " · latest reading " + nice(s.last) + " · record since " + nice(s.first) + " (" + s.days + " days)"));
+    p.appendChild(el("p", "sub", s.id + ", latest reading " + nice(s.last) + ", record since " + nice(s.first) + " (" + s.days + " days)"));
 
     var kv = el("dl", "kv");
     function row(k, v) { kv.appendChild(el("dt", null, k)); kv.appendChild(el("dd", null, v)); }

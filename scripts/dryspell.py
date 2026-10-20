@@ -185,7 +185,7 @@ def build(gdf, dates, rain):
         parishes[row["id"]] = {
             "name": row["name"], "cat": cat, "big": f"{length} days", "rv": length,
             "big_note": f"longest run of days under 1 mm of rain in the last 60 days (usual: {med:.0f})",
-            "tip": f"{NAMES[cat]} · {length} days (usual {med:.0f})", "rows": rows,
+            "tip": f"{NAMES[cat]}, {length} days (usual {med:.0f})", "rows": rows,
             "v": [by_year.get(y) for y in chart_years],
             "bc": ["#8c510a" if y == end.year else "#b8c4bd" for y in chart_years],
         }
@@ -195,15 +195,13 @@ def build(gdf, dates, rain):
         "subtitle": f"{cur_label}, compared with the same days in 1991–2020 (experimental)",
         "source": "gridMET daily precipitation, averaged by parish", "demo": False, "build": BUILD, "categories": CATEGORIES,
         "rank": {"high": "Longest spells", "low": "Shortest spells", "note": "Ranked by the longest dry spell in days."},
-        "how": ("Each parish shows its longest run of dry days (under 1 mm of rain) in the last 60 days, and whether that is longer or shorter than "
-                "the same 60 days in the 30 years from 1991 to 2020. A parish is \"about usual\" when its longest spell is in the middle 40% of "
-                "those years, or within 2 days of the usual."),
+        "how": ("The longest run of days with under 1 mm of rain in the last 60 days, compared with the same 60 days in each year from 1991 to 2020. A parish counts as about usual when its longest spell is in the middle 40% of those years or within 2 days of the usual."),
         "limits": [
-            "Experimental: this method has not been checked against the station gauges yet.",
-            "Rain is a parish average of a 4 km grid. Averaging over many cells and light drizzle in the grid shorten dry spells, so real spells at a field can be longer.",
-            "The longest spell in the window is shown, not the spell that matters for a given crop or growth stage.",
-            "A spell within 2 days of the usual is always shown as about usual, because in a short-spell parish a one-day difference moves the rank a lot and means little.",
-            "A parish is not rated when more than 10% of the window's days are missing.",
+            "Experimental. This has not been checked against the station gauges yet.",
+            "Rain is averaged over a 4 km grid, and light drizzle in the grid breaks up dry spells, so spells at a single field can be longer.",
+            "It shows the longest spell in the window, which may not match the stage a crop is at.",
+            "A difference of 2 days or less always shows as about usual, because one day moves the rank a lot in parishes with short spells.",
+            "A parish is left unrated when more than 10% of the days in the window are missing.",
         ],
         "credits": [{"text": "Rainfall: gridMET, Abatzoglou, J.T. (2013), Int. J. Climatology 33: 121-131", "url": "https://www.climatologylab.org/gridmet.html"}, BOUNDARY_CREDIT],
         "chart": {"kind": "bars", "unit": "days", "x": [str(y) for y in chart_years],

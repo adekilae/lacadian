@@ -188,10 +188,10 @@ def build_year(gdf, stats, emit, base):
     credits = [{"text": f"Crop maps: USDA National Agricultural Statistics Service, Cropland Data Layer {latest}, summarised by parish with the CropScape service (George Mason University)",
                 "url": "https://nassgeodata.gmu.edu/CropScape/"}, BOUNDARY_CREDIT]
     common_limits = [
-        "The Cropland Data Layer is a satellite map made once a year by USDA. Its accuracy is highest for the large crops (rice, soybeans, corn, cotton, sugarcane) and lower for small ones. NASS publishes accuracy tables for each year.",
-        f"Each parish is the total of 30 m pixels inside it for {latest}. A pixel can be wrongly labelled, and double crops (for example wheat then soybeans) count for both crops.",
-        "These are the crops mapped in one year. They are not a list of what a given farm grows and do not show rotations.",
-        "The most recent year is the last one NASS has published, so it is usually the previous growing season.",
+        "The Cropland Data Layer is a satellite map USDA makes once a year. It is most accurate for the big crops (rice, soybeans, corn, cotton, sugarcane) and less accurate for small ones. NASS publishes accuracy tables each year.",
+        f"Each parish is the total of the 30 m pixels inside it for {latest}. A pixel can be mislabelled, and double crops (wheat then soybeans, for example) count for both crops.",
+        "These are the crops mapped in one year. They do not show what a given farm grows or how it rotates crops.",
+        "The latest year is the last one NASS has published, which is usually the previous growing season.",
     ]
     # ---- per-parish totals for each year
     T = {y: {p: totals(stats[y][p]) for p in ids if p in stats[y]} for y in years}
@@ -226,9 +226,8 @@ def build_year(gdf, stats, emit, base):
         "label": "Cropland", "title": "Cropland: share of each parish in crops", "subtitle": f"USDA Cropland Data Layer {latest}",
         "source": f"USDA NASS Cropland Data Layer {latest}", "demo": False, "build": BUILD, "categories": cats,
         "rank": {"high": "Most cropland", "low": "Least cropland", "note": "Ranked by the share of the parish in crops."},
-        "how": (f"Each parish is coloured by the share of its mapped area that was in crops in {latest}, from the USDA Cropland Data Layer. Crops include field crops, "
-                "hay, orchards, vegetables and fallow or idle cropland. Grassland and pasture, forest, wetland, water and built-up land are not counted as crops."),
-        "limits": common_limits + ["Hay counts as a crop here; grassland and pasture do not. The map cannot always tell grazed pasture from other grass."],
+        "how": (f"The share of each parish's mapped area that was in crops in {latest}, from the USDA Cropland Data Layer. Crops include field crops, hay, orchards, vegetables and fallow or idle cropland. Grassland, pasture, forest, wetland, water and built-up land are not counted."),
+        "limits": common_limits + ["Hay counts as a crop here and grassland and pasture do not. The map cannot always tell grazed pasture from other grass."],
         "credits": credits,
         "chart": {"kind": "bars", "unit": "%", "x": [str(y) for y in years], "caption": "Share of the parish in crops, by year (dark bar: latest)", "top": "", "bottom": ""},
         "parishes": parishes,
@@ -272,9 +271,8 @@ def build_year(gdf, stats, emit, base):
         "label": "Main crops", "title": "Main crop in each parish", "subtitle": f"The crop with the largest area, USDA Cropland Data Layer {latest}",
         "source": f"USDA NASS Cropland Data Layer {latest}", "demo": False, "build": BUILD, "categories": cats2,
         "rank": {"high": "Largest main-crop area", "low": "Smallest main-crop area", "note": "Ranked by the area of each parish's main crop, in acres."},
-        "how": (f"Each parish is coloured by the crop with the largest mapped area in {latest}. Click a parish for its other main crops. Grass and pasture are left out, "
-                "because they are not crops. A parish with under 100 acres of crops has no main crop."),
-        "limits": common_limits + ["The main crop is the one with the most acres, even if it leads by a small margin. Check the table in the pop-up."],
+        "how": (f"The crop with the most mapped acres in each parish in {latest}. Click a parish to see its other main crops. Grass and pasture are left out because they are not crops, and a parish with under 100 acres of crops has no main crop."),
+        "limits": common_limits + ["The main crop is the one with the most acres, even if it leads by a small margin. The table in the pop-up shows the rest."],
         "credits": credits,
         "chart": {"kind": "bars", "unit": "acres", "x": [NAMES[k] for k in chart_keys], "caption": "Acres of the main crops in the parish", "top": "", "bottom": ""},
         "parishes": ptab,
@@ -317,17 +315,16 @@ def build_year(gdf, stats, emit, base):
                      "v": [round(past[y], 0) if y in past else None for y in years], "bc": ["#2D6A4F" if y == latest else "#b8c4bd" for y in years]}
         lim = list(common_limits)
         if key == "pasture":
-            lim.append("The map cannot tell grazed pasture from other grass, so this includes lawns, roadsides, levees and idle land. Hay is mapped separately in the CDL but is added here.")
+            lim.append("The map cannot tell grazed pasture from other grass, so this includes lawns, roadsides, levees and idle land. Hay is mapped separately in the CDL and added here.")
         if key == "aqua":
-            lim.append("CDL class 92 maps aquaculture ponds, but crawfish are often grown in flooded rice fields and in ponds the map labels as rice or water, so crawfish area is not captured well.")
+            lim.append("CDL class 92 maps aquaculture ponds. Crawfish are often grown in flooded rice fields or in ponds the map labels as rice or water, so crawfish area is not well captured.")
         if key in ("wheat", "soy", "corn", "cotton"):
-            lim.append("This crop includes double-crop classes, such as winter wheat followed by soybeans, so an acre can appear on two crop layers.")
+            lim.append("This crop includes double-crop classes such as winter wheat followed by soybeans, so one acre can show up on two crop layers.")
         emit(f"crop_{key}", {
             "label": name, "title": f"{name}: area by parish", "subtitle": f"Share of each parish, USDA Cropland Data Layer {latest}",
             "source": f"USDA NASS Cropland Data Layer {latest}", "demo": False, "build": BUILD, "categories": cc,
             "rank": {"high": "Most area", "low": "Least area", "note": "Ranked by acres."},
-            "how": (f"Each parish is coloured by the share of its mapped area that is {name.lower()} in {latest}. Colours rank the parishes in fifths (the cut points are in the legend). "
-                    "Click a parish for the area in acres, its rank, and how the area changed over the last five years."),
+            "how": (f"The share of each parish's mapped area that is {name.lower()} in {latest}. Colours split the parishes into fifths, and the cut points are in the legend. The pop-up shows the acres, the rank and how the area changed over the last five years."),
             "limits": lim, "credits": credits,
             "chart": {"kind": "bars", "unit": "acres", "x": [str(y) for y in years], "caption": f"Acres of {name.lower()} by year (dark bar: latest)", "top": "", "bottom": ""},
             "parishes": pk,
@@ -394,22 +391,21 @@ def landcover(gdf, stats):
         for y in years:
             sh = land_shares(stats[y][pid]) if pid in stats[y] else None
             series.append(None if sh is None else round(sh["Cropland"], 2))
-        rows = [[f"{n} share, {y0} → {y1}", f"{a[n]:.1f}% → {b[n]:.1f}% ({b[n] - a[n]:+.1f} points)"] for n in LAND]
+        rows = [[f"{n}, share of parish in {y0} and {y1}", f"{a[n]:.1f}% to {b[n]:.1f}% ({b[n] - a[n]:+.1f} points)"] for n in LAND]
         cat = land_category(d)
         parishes[pid] = {
             "name": row["name"], "cat": cat, "rv": round(float(d), 2), "big": f"{d:+.1f}",
-            "big_note": f"points: change in the share of the parish that is cropland, {y0} to {y1}", "tip": f"{names[cat]} · {d:+.1f} points",
+            "big_note": f"points: change in the share of the parish that is cropland, {y0} to {y1}", "tip": f"{names[cat]}, {d:+.1f} points",
             "rows": rows, "v": series, "bc": ["#b8c4bd" if v is None else "#4d8f6c" for v in series]}
     write_layer("landcover", {
         "label": "Land-cover change", "title": f"Land-cover change, {y0} to {y1}", "subtitle": f"Change in the share of each parish that is cropland, {y0} to {y1}",
         "source": "USDA National Agricultural Statistics Service, Cropland Data Layer", "demo": False, "build": BUILD, "categories": LAND_CATS,
         "rank": {"high": "Largest rise in cropland share", "low": "Largest fall in cropland share", "note": "Ranked by the change in cropland share (percentage points)."},
-        "how": (f"The Cropland Data Layer maps every 30 m cell of the state each year. For each parish this layer takes the share of mapped land that is cropland (including fallow and orchards) in {y0} and in {y1} and shows the difference in percentage points. "
-                "Click a parish to see how the shares of grass and pasture, forest, wetland, developed land and open water changed over the same years."),
+        "how": (f"The Cropland Data Layer maps every 30 m cell in the state each year. For each parish, this takes the share of mapped land that is cropland (including fallow and orchards) in {y0} and in {y1} and shows the difference in percentage points. The pop-up also shows the change in grass and pasture, forest, wetland, developed land and open water."),
         "limits": [
-            "The Cropland Data Layer is built mainly to map crops. Its non-crop classes (forest, wetland, developed) are less accurate than its crop classes.",
-            "Only a few years are compared. A change of a point or two can be map error or a different mix of crops and fallow in one year, not a lasting change in land use.",
-            "A rise in cropland share does not say what the land was before, and a fall does not say what it became. The other rows give a hint, not proof.",
+            "The Cropland Data Layer is built mainly to map crops. Its forest, wetland and developed classes are less accurate.",
+            "Only a few years are compared. A change of a point or two can be map error or a different mix of crops and fallow that year, not a lasting change in land use.",
+            "A rise in cropland share does not say what the land was before, and a fall does not say what it became.",
             "Wetland and open-water shares move with the weather in the mapping year as well as with real change.",
         ],
         "credits": [{"text": "USDA National Agricultural Statistics Service, Cropland Data Layer", "url": "https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php"}, BOUNDARY_CREDIT],

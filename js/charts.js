@@ -95,7 +95,7 @@
     const cats = D.categories.filter(c => (D.counts[c.key] || 0) > 0);
     const top = 190, legendH = 70 + cats.length * 46, foot = 150, W = mw + 160, H = top + Math.max(mh, legendH) + foot;
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const g = cv.getContext("2d");
-    const SANS = "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+    const SANS = "Arial, Helvetica, sans-serif";
     g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
     g.fillStyle = "#16324F"; g.font = `700 54px ${SANS}`; g.fillText(D.title, 80, 90, W - 160);
     g.fillStyle = "#566670"; g.font = `34px ${SANS}`; g.fillText(D.subtitle || "", 80, 145, W - 160);

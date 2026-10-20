@@ -34,10 +34,10 @@
     const h = document.getElementById("hdr");
     if (h) {
       h.className = "top";
-      h.innerHTML = `<div class="wrap bar"><a class="brand" href="${ROOT}index.html" aria-label="LaCADIAN Environmental Intelligence home"><span class="mark" aria-hidden="true"></span><span class="brandtext"><span class="name">LaCADIAN Environmental Intelligence</span><span class="name2">LAND · WATER · CLIMATE INTELLIGENCE</span></span></a>
+      h.innerHTML = `<div class="wrap bar"><a class="brand" href="${ROOT}index.html" aria-label="LaCADIAN Environmental Intelligence home"><span class="mark" aria-hidden="true"></span><span class="brandtext"><span class="name">LaCADIAN Environmental Intelligence</span></span></a>
         <nav class="nav" aria-label="Pages">${NAV.map(([t, u]) => `<a href="${ROOT}${u}"${t === PAGE ? ' aria-current="page"' : ""}>${esc(t)}</a>`).join("")}</nav>
-        <form class="hsearch" role="search" onsubmit="return false"><input type="search" id="hs" name="lc-search" list="hs-list" autocomplete="off" spellcheck="false" placeholder="Search parish or layer…" aria-label="Search parish or layer"><datalist id="hs-list"></datalist></form></div>
-        <div class="proto"><div class="wrap"><strong>Unofficial prototype for review.</strong> Built from public data by a graduate student. It has not been reviewed or approved by the LaCADIAN network team and must not be used for farm decisions.</div></div>`;
+        <form class="hsearch" role="search" onsubmit="return false"><input type="search" id="hs" name="lc-search" list="hs-list" autocomplete="off" spellcheck="false" placeholder="Search for a parish or layer" aria-label="Search parish or layer"><datalist id="hs-list"></datalist></form></div>
+        <div class="proto"><div class="wrap"><strong>Unofficial prototype.</strong> Built from public data by a graduate student. The LaCADIAN network team has not reviewed it, and it should not be used to make farm decisions.</div></div>`;
       const box = document.getElementById("hs");
       let index = null;
       const load = () => index || (index = Promise.all([getData("data/parishes.geojson"), getData("data/layers.json")]).then(([gj, man]) => {
@@ -60,7 +60,7 @@
       f.innerHTML = `<div class="wrap"><p>Station data: LaCADIAN network (Louisiana Climate &amp; Digital Ag Network), LSU Soil Hydrology and Remote Sensing (SHaRE) Lab; stated as CC BY-NC 4.0, for academic and non-commercial use.
         Satellite and gridded layers: NASA, USDA, FEMA, JRC and University of Idaho sources, credited on each map. Parish boundaries: US Census Bureau.
         Basemap: Esri, HERE, Garmin, OpenStreetMap contributors.</p>
-        <p><a href="${ROOT}pages/methods.html">Data and methods</a> · <a href="${ROOT}pages/about.html">About this prototype</a></p></div>`;
+        <p><a href="${ROOT}pages/methods.html">Data and methods</a> | <a href="${ROOT}pages/about.html">About this prototype</a></p></div>`;
     }
   }
 

@@ -66,6 +66,7 @@ LAYERS = [
     ("vegetation", "Vegetation", "land", None),
     ("flood", "Flood risk", "land", None),
     ("water", "Surface water change", "land", None),
+    ("streamflow", "River and streamflow", "land", None),
     ("landcover", "Land-cover change", "land", None),
 ]
 

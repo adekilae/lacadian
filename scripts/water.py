@@ -143,20 +143,19 @@ def build(gdf, results):
                 ["Permanent water, 2021", f"{r['perm']:,.1f} km²"], ["Seasonal water, 2021", f"{r['seas']:,.1f} km²"]]
         parishes[pid] = {"name": row["name"], "cat": cat, "rv": round(float(pct), 3), "big": f"{pct:+.1f}%",
                          "big_note": "net change in surface water as a share of the parish area, 1984 to 2021",
-                         "tip": f"{names[cat]} · net {r['net']:+,.1f} km²", "rows": rows,
+                         "tip": f"{names[cat]}, net {r['net']:+,.1f} km²", "rows": rows,
                          "v": [round(r["gain"], 1), round(r["loss"], 1), round(r["perm"], 1), round(r["seas"], 1)],
                          "bc": ["#08519c", "#a63603", "#6baed6", "#b8c4bd"]}
     write_layer("water", {
         "label": "Surface water change", "title": "Surface water change, 1984 to 2021", "subtitle": "Net change in open water, as a share of each parish's area (JRC Global Surface Water)",
         "source": "JRC Global Surface Water, transitions map v1.4 (2021)", "demo": False, "build": BUILD, "categories": cats,
         "rank": {"high": "Most net water gained", "low": "Most net water lost", "note": "Ranked by net change as a percentage of the parish area."},
-        "how": ("Each parish is coloured by how much its surface water changed between the early and late years of a 1984 to 2021 satellite record, as a share of the parish's area. "
-                "Blue means more water now, brown means less. In coastal parishes, more water is mostly marsh and land lost to open water. Click a parish for the areas."),
+        "how": ("How much each parish's surface water changed between the early and late years of a 1984 to 2021 satellite record, as a share of the parish area. Blue means more water now and brown means less. In coastal parishes, more water mostly means marsh and land lost to open water. The pop-up shows the areas."),
         "limits": [
-            "The map compares the early and late years of the record. It shows a long-term change, not a particular flood or this year's water level.",
-            "Seasonal water depends on the weather of the years compared. A wet late period can show as a gain and a dry one as a loss.",
-            "More water can mean new ponds and reservoirs, flooded fields, or land lost to the sea. Less water can mean drained or dried ponds. The map cannot tell them apart.",
-            "Clouds and shadows can hide water on Landsat images; the source corrects for this but small ponds and narrow bayous are not always seen.",
+            "It compares the early and late years of the record. It shows a long-term change and not a particular flood or this year's water level.",
+            "Seasonal water depends on the weather in the years compared. A wet late period can look like a gain and a dry one like a loss.",
+            "More water can mean new ponds and reservoirs, flooded fields or land lost to the sea. Less water can mean drained or dried-up ponds. The map cannot tell these apart.",
+            "Clouds and shadows can hide water in Landsat images. The source corrects for this, but small ponds and narrow bayous are not always seen.",
             "The record ends in 2021, so recent changes are not shown.",
         ],
         "credits": [{"text": "Pekel, J.-F., Cottam, A., Gorelick, N., Belward, A.S. (2016) High-resolution mapping of global surface water and its long-term changes. Nature 540, 418-422. Data: European Commission Joint Research Centre", "url": "https://global-surface-water.appspot.com/"}, BOUNDARY_CREDIT],

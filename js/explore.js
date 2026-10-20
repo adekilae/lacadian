@@ -14,7 +14,7 @@
     { id: "c2", title: "Soil & hydrology", items: [{ k: "soil" }, { k: "soilsurf" }, { p: "Root-zone model (pCC)" }, { k: "soildef" }] },
     { id: "c3", title: "Drought", items: [{ k: "usdm" }, { k: "usdm_onset" }, { k: "soilgap" }] },
     { id: "c4", title: "Agriculture & vegetation", items: [{ k: "cropland" }, { k: "vegetation" }, { sub: "Crops", keys: CROPS }, { sub: "Soil properties", keys: SOILP }, { p: "Crop water stress" }] },
-    { id: "c5", title: "Water & flooding", items: [{ k: "flood" }, { k: "water" }, { p: "River and streamflow" }, { p: "Rainfall recharge effectiveness" }] },
+    { id: "c5", title: "Water & flooding", items: [{ k: "flood" }, { k: "water" }, { k: "streamflow" }, { p: "Rainfall recharge effectiveness" }] },
     { id: "c6", title: "Land & coastal", items: [{ k: "landcover" }, { p: "Wetland and coastal vegetation change" }, { p: "Coastal salinity stress" }] },
   ];
   const TABS = [
@@ -22,7 +22,7 @@
     ["Climate", ["rain", "dryspell", "airtemp", "et0"]],
     ["Soil & drought", ["soil", "soilsurf", "soildef", "soilgap", "usdm", "usdm_onset"].concat(SOILP)],
     ["Agriculture", ["cropland", "vegetation"].concat(CROPS)],
-    ["Water", ["flood", "water"]],
+    ["Water", ["flood", "water", "streamflow"]],
     ["Land", ["landcover", "cropland"]],
   ];
   const PLAIN = ["rain", "soil", "usdm", "dryspell", "vegetation", "flood", "water"];
@@ -43,7 +43,7 @@
       <div class="centre">
         <div class="card mapcard">
           <div class="status" id="status"></div>
-          <h2 class="maptitle" id="title">Loading…</h2>
+          <h2 class="maptitle" id="title">Loading</h2>
           <p class="sub" id="subtitle"></p>
           <div class="period" id="periodbar" hidden><label for="pYear">Period</label><select id="pYear" aria-label="Year"></select><select id="pMonth" aria-label="Month" hidden></select><span class="sub" id="pNote" style="margin:0"></span></div>
           <div class="mapbox"><div id="map" role="application" aria-label="Map of Louisiana parishes"></div>
@@ -236,12 +236,12 @@
 
   function pinfo() {
     const names = GJ.features.map(f => f.properties).sort((a, b) => a.name.localeCompare(b.name));
-    let h = `<h2>Parish information</h2><select id="psel" aria-label="Parish"><option value="">Select a parish…</option>${names.map(p => `<option value="${p.id}"${p.id === sel ? " selected" : ""}>${esc(p.name)}</option>`).join("")}</select>`;
+    let h = `<h2>Parish information</h2><select id="psel" aria-label="Parish"><option value="">Select a parish</option>${names.map(p => `<option value="${p.id}"${p.id === sel ? " selected" : ""}>${esc(p.name)}</option>`).join("")}</select>`;
     if (!sel) {
       h += `<p class="sub" style="margin-top:10px">Click a parish on the map, or choose one above, to see its indicators.</p>`;
     } else {
       const f = GJ.features.find(f => f.properties.id === sel).properties;
-      h += `<h3 class="pname">${esc(f.name)} Parish</h3><p class="meta">Land area ${Math.round(f.land_sqmi).toLocaleString()} sq mi · FIPS ${esc(sel)}</p>`;
+      h += `<h3 class="pname">${esc(f.name)} Parish</h3><p class="meta">Land area ${Math.round(f.land_sqmi).toLocaleString()} sq mi, FIPS ${esc(sel)}</p>`;
       h += `<div class="tabs" role="group" aria-label="Indicator group">${TABS.map((t, i) => `<button type="button" data-t="${i}" aria-pressed="${i === tab}">${esc(t[0])}</button>`).join("")}</div>`;
       const keys = TABS[tab][1].filter(k => layerMeta(k) && layerMeta(k).built);
       const items = keys.map(k => {
@@ -250,12 +250,13 @@
         if (!p) return "";
         return `<li data-k="${k}" tabindex="0"><span class="chip" style="background:${esc(CH.maps(D).color[p.cat] || "#bdbdbd")}"></span><span class="il">${esc(D.label)}</span><span class="iv">${esc(p.big)}</span></li>`;
       }).join("");
-      h += `<h3>Key indicators</h3>` + (items ? `<ul class="ind">${items}</ul>` : `<p class="sub">No built layers in this group yet.</p>`);
+      h += `<h3>Latest values</h3>` + (items ? `<ul class="ind">${items}</ul>` : `<p class="sub">No built layers in this group yet.</p>`);
       const plain = PLAIN.filter(k => DATA[k] && DATA[k].parishes[sel]).map(k => {
         const D = DATA[k], p = D.parishes[sel];
-        return `<li><b>${esc(D.label)}:</b> ${esc(p.big)}${p.big_note ? ", " + esc(p.big_note) : ""}</li>`;
+        const note = p.big_note ? (/^(of|is|are|points|percentile)\b/.test(p.big_note) ? " " : ", ") + esc(p.big_note) : "";
+        return `<li><b>${esc(D.label)}:</b> ${esc(p.big)}${note}</li>`;
       }).join("");
-      if (plain) h += `<h3>In plain words</h3><ul class="plain">${plain}</ul><p class="sub" style="margin-top:6px">Each line is the value on that layer's map, as measured or mapped. It is not advice.</p>`;
+      if (plain) h += `<h3>Summary</h3><ul class="plain">${plain}</ul>`;
       h += `<p style="margin:12px 0 0"><a class="btn primary" href="pages/parish.html#${esc(sel)}">View full parish report</a></p>`;
       if (V() && V().parishes[sel]) {
         const D = V(), p = D.parishes[sel];
@@ -423,21 +424,22 @@
   });
 
   // ------------------------------------------------------------ statewide ribbon
-  function tile(cls, ico, title, value, sub) {
-    return `<div class="tile"><span class="ico ${cls}" aria-hidden="true">${ico}</span><div><div class="t">${esc(title)}</div><div class="v">${esc(value)}</div><div class="s">${esc(sub)}</div></div></div>`;
+  function tile(title, value, sub) {
+    return `<div class="tile"><div><div class="t">${esc(title)}</div><div class="v">${esc(value)}</div><div class="s">${esc(sub)}</div></div></div>`;
   }
   function countOf(D, keys) { return keys.reduce((n, k) => n + (D.counts[k] || 0), 0); }
+  const shortSub = D => String(D.subtitle || D.label).replace(/,\s*(against|official).*$/, "").replace(/^Weekly map valid /, "Map of ");
   function ribbon() {
     const t = [], n = GJ.features.length;
     const R = DATA.rain, S = DATA.soil, U = DATA.usdm;
-    t.push(R ? tile("b", "R", "Rainfall below normal", `${countOf(R, ["very_dry", "dry"])} of ${n}`, "parishes, " + (R.subtitle || R.label)) : tile("b", "R", "Rainfall", "–", "not built yet"));
-    t.push(S ? tile("a", "S", "Dry root-zone soil", `${countOf(S, ["very_dry", "dry"])} of ${n}`, "parishes, " + (S.subtitle || S.label)) : tile("a", "S", "Soil moisture", "–", "not built yet"));
-    t.push(U ? tile("a", "D", "In drought (D1–D4)", `${countOf(U, ["d1", "d2", "d3", "d4"])} of ${n}`, "parishes, " + (U.subtitle || U.label)) : tile("a", "D", "Drought Monitor", "–", "not built yet"));
-    t.push(STN ? tile("g", "St", "LaCADIAN stations", String(STN.n), "data through " + niceDate(STN.data_through)) : tile("g", "St", "LaCADIAN stations", "–", "not available"));
+    t.push(R ? tile("Rain below normal", `${countOf(R, ["very_dry", "dry"])} of ${n} parishes`, shortSub(R)) : tile("Rainfall", "-", "not built yet"));
+    t.push(S ? tile("Dry root-zone soil", `${countOf(S, ["very_dry", "dry"])} of ${n} parishes`, shortSub(S)) : tile("Soil moisture", "-", "not built yet"));
+    t.push(U ? tile("In drought (D1 or worse)", `${countOf(U, ["d1", "d2", "d3", "d4"])} of ${n} parishes`, shortSub(U)) : tile("Drought Monitor", "-", "not built yet"));
+    t.push(STN ? tile("LaCADIAN stations", String(STN.n), "Data through " + niceDate(STN.data_through)) : tile("LaCADIAN stations", "-", "not available"));
     const built = MAN.layers.filter(l => l.built).length;
-    t.push(tile("n", "L", "Map layers built", `${built} of ${MAN.layers.length}`, "more are planned"));
+    t.push(tile("Map layers", `${built} of ${MAN.layers.length}`, "More are planned"));
     const newest = MAN.layers.map(l => l.updated).filter(Boolean).sort().pop();
-    t.push(tile("n", "U", "Last updated", newest ? niceDate(newest) : "n/a", "map layers, daily or monthly"));
+    t.push(tile("Last updated", newest ? niceDate(newest) : "n/a", "Most layers update daily"));
     $("ribbon").innerHTML = t.join("");
   }
 

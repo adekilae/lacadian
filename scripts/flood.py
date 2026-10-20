@@ -174,14 +174,12 @@ def build(gdf, table):
         "label": "Flood risk", "title": "Flood risk of each parish (FEMA National Risk Index)", "subtitle": "Higher of riverine and coastal flooding, compared with all US counties",
         "source": "FEMA National Risk Index, county table", "demo": False, "build": BUILD, "categories": cats,
         "rank": {"high": "Highest flood risk score", "low": "Lowest flood risk score", "note": "Ranked by the higher of the riverine and coastal flooding scores (0 to 100)."},
-        "how": ("Each parish is coloured by its flood risk rating from FEMA's National Risk Index: the higher of its riverine flooding and its coastal flooding rating. "
-                "The rating compares the parish with every county in the United States and combines how often flooding happens, what is exposed to it and how vulnerable that is. "
-                "Click a parish for both ratings, hurricane risk and the expected yearly loss."),
+        "how": ("The flood risk rating from FEMA's National Risk Index, using the higher of the riverine and coastal flooding ratings. FEMA compares each parish with every US county and combines how often flooding happens, what is exposed and how vulnerable it is. The pop-up shows both ratings, hurricane risk and the expected yearly loss."),
         "limits": [
-            "This is a risk rating relative to other US counties. It does not show how much of the parish floods and it is not a forecast.",
-            "The rating mixes the chance of flooding with what is exposed (buildings, people, farm value). A thinly populated parish can have flood-prone land and a low rating.",
-            "It is a county-level figure. Flood risk varies a lot inside a parish; FEMA flood maps and local drainage districts are the guide for a particular field or house.",
-            "The Risk Index is updated every year or two, so it does not show last month's floods.",
+            "It is a rating relative to other US counties. It does not show how much of a parish floods and it is not a forecast.",
+            "The rating mixes the chance of flooding with what is exposed (buildings, people, farm value), so a thinly populated parish can have flood-prone land and a low rating.",
+            "It is a county-level number. For a particular field or house, use FEMA flood maps and the local drainage district.",
+            "FEMA updates the index every year or two, so recent floods are not in it.",
         ],
         "credits": [{"text": "FEMA National Risk Index", "url": "https://hazards.fema.gov/nri/"}, BOUNDARY_CREDIT],
         "chart": {"kind": "bars", "unit": "score", "x": ["Riverine flood", "Coastal flood", "Hurricane"], "caption": "National Risk Index scores (0 to 100) for the parish", "top": "", "bottom": ""},

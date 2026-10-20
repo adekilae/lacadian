@@ -158,7 +158,7 @@ def build_temp(gdf, dates, tmax, tmin):
             rows.append([f"Last month ({MON[m - 1]})", f"{one[0][i] - one[1][i]:+.1f} °C from normal"])
         parishes[pid] = {
             "name": row["name"], "cat": cat, "rv": round(float(d), 2), "big": f"{d:+.1f} °C",
-            "big_note": f"compared with the normal mean temperature, {label} ({d * 9 / 5:+.1f} °F)", "tip": f"{names[cat]} · {d:+.1f} °C",
+            "big_note": f"compared with the normal mean temperature, {label} ({d * 9 / 5:+.1f} °F)", "tip": f"{names[cat]}, {d:+.1f} °C",
             "rows": rows,
             "v": [None if (h is None or np.isnan(h[2][i]) or np.isnan(h[1][i])) else round(float(h[0][i] - h[1][i]), 2) for h in hist],
             "c": ["not_rated" if (h is None or np.isnan(h[2][i])) else category(h[2][i], keys) for h in hist]}
@@ -170,21 +170,19 @@ def build_temp(gdf, dates, tmax, tmin):
         yy, mm = ymo(e)
         rows_m.append((f"{yy}-{mm:02d}", label_for(e), list(r[0] - r[1]), [None if np.isnan(x) else category(x, keys) for x in r[2]]))
     write_months("airtemp", list(gdf["id"]), rows_m, [c["key"] for c in TEMP_CATS], "not_rated", "against the same months in 1991–2020", "{v} °C",
-                 "compared with the normal mean temperature, {label}", "{cat} · {v} °C", "Difference from normal (°C)", offset=0, suffix=" °C", decimals=1, plus=True)
+                 "compared with the normal mean temperature, {label}", "{cat}, {v} °C", "Difference from normal (°C)", offset=0, suffix=" °C", decimals=1, plus=True)
     ranked = int((~np.isnan(pc)).sum())
     print(f"air temperature, {label}: {ranked} of {len(gdf)} parishes rated; mean difference {np.nanmean(cur - normal):+.2f} °C")
     write_layer("airtemp", {
         "label": "Air temperature", "title": "Air temperature compared with normal", "subtitle": f"{label}, against the same months in 1991–2020",
         "source": "gridMET daily maximum and minimum temperature, averaged by parish", "demo": False, "build": BUILD, "categories": TEMP_CATS,
         "rank": {"high": "Warmest compared with normal", "low": "Coolest compared with normal", "note": "Ranked by the difference from the 1991–2020 mean temperature (°C)."},
-        "how": (f"Each parish shows how far the average air temperature of the last three complete months ({label}) is from the average of the same months in 1991–2020. "
-                "The mean temperature is the average of each day's maximum and minimum. The colour is where this year ranks among the 30 normal years: "
-                "\"much warmer\" means among the warmest 10%, and the same in reverse for \"cooler\". Click a parish for the figures and the last 12 months."),
+        "how": (f"How far the average air temperature of the last three complete months ({label}) is from the average of the same months in 1991 to 2020. The mean temperature is the average of each day's high and low. The colour shows where this year ranks among those 30 years, so \"much warmer\" means among the warmest 10%."),
         "limits": [
-            "gridMET is a 4 km grid that blends PRISM, which is built from weather stations, with a land-model reanalysis. It is an estimate, not a thermometer reading.",
-            "The value for a parish is the mean of the grid cells inside it.",
-            "Mean temperature hides hot afternoons and cool nights. It does not count heat days or frost.",
-            "The newest days are provisional and are revised for a few weeks. A month is used only when every day of it is in the record.",
+            "gridMET is a 4 km grid that mixes PRISM (built from weather stations) with a land model. It is an estimate, not a thermometer reading.",
+            "A parish value is the average of the grid cells inside it.",
+            "Mean temperature hides hot afternoons and cool nights, and it does not count heat days or frost.",
+            "The newest days are provisional and get revised for a few weeks. A month only counts when every day is in the record.",
         ],
         "credits": [{"text": "Temperature: gridMET, Abatzoglou, J.T. (2013), Int. J. Climatology 33: 121-131", "url": "https://www.climatologylab.org/gridmet.html"}, BOUNDARY_CREDIT],
         "chart": {"kind": "diverging", "cap": 4, "unit": "°C vs normal", "x": [MON[ymo(end - HISTORY_MONTHS + 1 + k)[1] - 1] for k in range(HISTORY_MONTHS)],
@@ -215,7 +213,7 @@ def build_et(gdf, dates, pet):
         cat = category(pc[i], keys)
         parishes[pid] = {
             "name": row["name"], "cat": cat, "rv": round(float(pctn[i]), 1), "big": f"{pctn[i]:.0f}%",
-            "big_note": f"of normal evaporative demand, {label}", "tip": f"{names[cat]} · {pctn[i]:.0f}% of normal",
+            "big_note": f"of normal evaporative demand, {label}", "tip": f"{names[cat]}, {pctn[i]:.0f}% of normal",
             "rows": [[f"Evaporative demand, {label}", f"{cur[i]:.0f} mm"], ["Normal for these months (1991–2020)", f"{normal[i]:.0f} mm"],
                      ["Earlier years with less demand", f"{round(pc[i] / 100 * nref[i])} of {int(nref[i])}"]],
             "v": [None if (h is None or np.isnan(h[2][i]) or not h[1][i] > 0) else round(float(h[0][i] / h[1][i] * 100 - 100), 1) for h in hist],
@@ -229,20 +227,18 @@ def build_et(gdf, dates, pet):
         with np.errstate(divide="ignore", invalid="ignore"):
             rows_m.append((f"{yy}-{mm:02d}", label_for(e), list(r[0] / r[1] * 100), [None if np.isnan(x) else category(x, keys) for x in r[2]]))
     write_months("et0", list(gdf["id"]), rows_m, [c["key"] for c in ET_CATS], "not_rated", "against the same months in 1991–2020", "{v}%",
-                 "of normal evaporative demand, {label}", "{cat} · {v}% of normal", "Evaporative demand as % of normal")
+                 "of normal evaporative demand, {label}", "{cat}, {v}% of normal", "Evaporative demand as % of normal")
     print(f"evaporative demand, {label}: {int((~np.isnan(pc)).sum())} of {len(gdf)} parishes rated; mean {np.nanmean(pctn):.0f}% of normal")
     write_layer("et0", {
         "label": "Evaporative demand", "title": "Evaporative demand (ET₀) compared with normal", "subtitle": f"{label}, against the same months in 1991–2020",
         "source": "gridMET reference evapotranspiration (grass), averaged by parish", "demo": False, "build": BUILD, "categories": ET_CATS,
         "rank": {"high": "Highest demand compared with normal", "low": "Lowest demand compared with normal", "note": "Ranked by evaporative demand as a percentage of normal."},
-        "how": (f"Reference evapotranspiration (ET₀) is how much water a well-watered grass surface would lose to the air in a day, worked out from temperature, sunshine, humidity and wind. "
-                f"Each parish shows the total for the last three complete months ({label}) compared with the same months in 1991–2020. "
-                "A high figure means the air is pulling more water from soil and plants than usual, which dries the soil faster for the same rain."),
+        "how": (f"Reference evapotranspiration (ET₀) is the water a well-watered grass surface would lose to the air in a day, worked out from temperature, sunshine, humidity and wind. This shows the total for the last three complete months ({label}) compared with the same months in 1991 to 2020. A high number means the air is pulling more water out of soil and plants than usual, so the soil dries faster for the same rain."),
         "limits": [
-            "ET₀ is a demand figure for a reference grass surface, not the water a particular crop or field actually uses.",
-            "It comes from gridMET, a 4 km grid that blends PRISM with a land-model reanalysis, using modelled sunshine, humidity and wind. It is an estimate.",
-            "The value for a parish is the mean of the grid cells inside it.",
-            "High demand is not drought by itself. Read it with the rainfall and soil-moisture layers.",
+            "ET₀ is demand for a reference grass surface. It is not the water a particular crop or field uses.",
+            "It comes from gridMET, a 4 km grid that mixes PRISM with a land model, using modelled sunshine, humidity and wind. It is an estimate.",
+            "A parish value is the average of the grid cells inside it.",
+            "High demand is not drought by itself. Read it together with rainfall and soil moisture.",
         ],
         "credits": [{"text": "Evaporative demand: gridMET, Abatzoglou, J.T. (2013), Int. J. Climatology 33: 121-131", "url": "https://www.climatologylab.org/gridmet.html"}, BOUNDARY_CREDIT],
         "chart": {"kind": "diverging", "cap": 50, "unit": "% vs normal", "x": [MON[ymo(end - HISTORY_MONTHS + 1 + k)[1] - 1] for k in range(HISTORY_MONTHS)],

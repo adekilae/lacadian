@@ -187,7 +187,7 @@ def make_payload(gdf, by, weeks, latest):
             "big": NAMES[cat].split(" ")[0].upper() if cat != "none" else "None",
             "big_note": (f"is the most severe category covering at least {SHARE:.0f}% of the parish, map of {when.day} {when:%b %Y}" if cat != "none"
                          else f"No drought category covers {SHARE:.0f}% of the parish, map of {when.day} {when:%b %Y}"),
-            "tip": f"{NAMES[cat]} · {cum[1]:.0f}% of the parish in D1 or worse",
+            "tip": f"{NAMES[cat]}, {cum[1]:.0f}% of the parish in D1 or worse",
             "rows": rows,
             "v": [None if h is None else round(h[1], 1) for h in hist],
             "bc": ["#b8c4bd" if h is None else COLORS[category(h)] for h in hist],
@@ -199,14 +199,12 @@ def make_payload(gdf, by, weeks, latest):
         "source": "US Drought Monitor, National Drought Mitigation Center (University of Nebraska-Lincoln), USDA and NOAA", "demo": False, "build": BUILD,
         "categories": CATEGORIES,
         "rank": {"high": "Most area in drought (D1 or worse)", "low": "Least area in drought", "note": "Ranked by the share of the parish in D1 or worse."},
-        "how": (f"Each parish is coloured by the most severe drought category that covers at least {SHARE:.0f}% of its area, from the latest weekly US Drought "
-                "Monitor. The pop-up gives the share of the parish in each category and the last 12 weeks. This is the official map, drawn by "
-                "experts, and is a separate source from the other layers on this page."),
+        "how": (f"Each parish is coloured by the worst Drought Monitor category that covers at least {SHARE:.0f}% of its area, from the latest weekly map. The pop-up shows the share of the parish in each category and the last 12 weeks. The Drought Monitor is drawn by experts and is a separate source from the other layers."),
         "limits": [
-            "The Drought Monitor is made by experts from many sources, including local reports. It does not use only the data shown in the other layers, so the maps can differ.",
-            f"A parish takes the colour of the worst category covering {SHARE:.0f}% or more of it. A smaller area in a worse category is shown only in the pop-up.",
-            "It is a weekly map valid on Tuesdays and released on Thursdays. It describes conditions over the weeks before, mostly long-term dryness.",
-            "It is not a forecast and does not describe a single field.",
+            "Experts draw it from many sources, including local reports, so it can differ from the other layers on this page.",
+            f"Only a category covering {SHARE:.0f}% or more of the parish sets the colour. A smaller area in a worse category shows only in the pop-up.",
+            "It is a weekly map valid on Tuesdays and released on Thursdays. It reflects the weeks before, mostly long-term dryness.",
+            "It is not a forecast and does not describe single fields.",
         ],
         "credits": [{"text": "US Drought Monitor, National Drought Mitigation Center at the University of Nebraska-Lincoln, the USDA and NOAA", "url": "https://droughtmonitor.unl.edu/"}, BOUNDARY_CREDIT],
         "chart": {"kind": "bars", "unit": "%", "x": [f"{int(w[8:])} {dt.date.fromisoformat(w):%b}" for w in chart_weeks],
@@ -267,7 +265,7 @@ def make_onset(gdf, by, weeks, latest):
             continue
         start = use[len(use) - n] if n else None
         if n:
-            big, note = f"{'≥' if cut else ''}{n} wk", f"in drought (D1 or worse over {SHARE:.0f}%+ of the parish), since the map of {dt.date.fromisoformat(start):%d %b %Y}"
+            big, note = f"{'at least ' if cut else ''}{n} wk", f"in drought (D1 or worse over {SHARE:.0f}%+ of the parish), since the map of {dt.date.fromisoformat(start):%d %b %Y}"
         elif cat == "rec":
             big, note = f"{since} wk", "since the parish was last in drought (D1 or worse over 25%+ of its area)"
         else:
@@ -275,7 +273,7 @@ def make_onset(gdf, by, weeks, latest):
         d1 = [by.get((pid, w)) for w in use[-12:]]
         parishes[pid] = {
             "name": row["name"], "cat": cat, "rv": float(n), "big": big, "big_note": note + f", map of {when.day} {when:%b %Y}" if n else note,
-            "tip": f"{names[cat]}" + (f" · {n} weeks" if n else ""),
+            "tip": f"{names[cat]}" + (f", {n} weeks" if n else ""),
             "rows": [["Weeks in drought now", f"{'at least ' if cut else ''}{n}" if n else "0"],
                      ["Weeks since last in drought", "–" if n else ("not in the record" if since is None else str(since))],
                      ["Area in D1 or worse, this week", f"{by[(pid, latest)][1]:.0f}%"]],
@@ -286,13 +284,12 @@ def make_onset(gdf, by, weeks, latest):
         "subtitle": f"Weekly Drought Monitor maps up to {when.day} {when:%b %Y}", "source": "US Drought Monitor, National Drought Mitigation Center (University of Nebraska-Lincoln), USDA and NOAA",
         "demo": False, "build": BUILD, "categories": ONSET_CATS,
         "rank": {"high": "Longest in drought", "low": "Shortest or no drought", "note": "Ranked by weeks in drought now."},
-        "how": (f"A parish counts as \"in drought\" in a week when D1 (moderate drought) or worse covers at least {SHARE:.0f}% of it. The map counts how many weeks in a row it has been in drought, "
-                f"or, if it is out, how long ago the drought ended. \"New\" is 8 weeks or fewer, \"established\" 9 to 26, \"long-lived\" more than 26. \"Recovering\" means out of drought for up to {RECOVER_WEEKS} weeks."),
+        "how": (f"A parish counts as in drought in a given week when D1 (moderate drought) or worse covers at least {SHARE:.0f}% of it. The map shows how many weeks in a row it has been in drought, or how long ago the drought ended. New means 8 weeks or fewer, established 9 to 26 weeks, and long-lived more than 26. Recovering means out of drought for up to {RECOVER_WEEKS} weeks."),
         "limits": [
-            "This only re-reads the weekly Drought Monitor maps, so it inherits their limits: they are drawn by experts from many sources and describe mostly long-term dryness.",
-            f"The 25% rule is ours. A drought covering less of a parish does not count, and a parish that sits near the line can flip between weeks.",
+            "It re-reads the weekly Drought Monitor maps, so it has the same limits as that layer.",
+            "The 25% rule is ours. A parish near the line can switch back and forth from week to week.",
             f"Only about {HISTORY_YEARS} years of weekly maps are kept, so a count that reaches the start of the record is shown as \"at least\".",
-            "A parish being out of drought is not a forecast that it will stay out.",
+            "Being out of drought now does not mean it will stay out.",
         ],
         "credits": [{"text": "US Drought Monitor, National Drought Mitigation Center at the University of Nebraska-Lincoln, the USDA and NOAA", "url": "https://droughtmonitor.unl.edu/"}, BOUNDARY_CREDIT],
         "chart": {"kind": "bars", "unit": "%", "x": [f"{int(w[8:])} {dt.date.fromisoformat(w):%b}" for w in use[-12:]],

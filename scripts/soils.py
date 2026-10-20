@@ -195,10 +195,10 @@ def build(gdf, data):
     credits = [{"text": "Soils: USDA Natural Resources Conservation Service, Soil Survey Geographic Database (SSURGO), through Soil Data Access", "url": "https://sdmdataaccess.nrcs.usda.gov/"},
                BOUNDARY_CREDIT]
     limits = [
-        f"Values are averages of the top {TOP_CM} cm, over every soil map unit in the parish weighted by its area. One parish holds many different soils, so a field can differ a lot from the parish average.",
-        "The soil survey describes soils from field surveys and lab samples. The numbers are the survey's representative values, not measurements of a particular field.",
-        "Some soil survey areas cover two parishes or part of a parish; those values are shared between the parishes they cover.",
-        "Soil changes slowly, but liming, fertiliser, drainage and flooding change pH, organic matter and salinity locally. Soil tests are the reliable guide for a field.",
+        f"Values are averages for the top {TOP_CM} cm, over every soil map unit in the parish, weighted by area. A parish holds many soils, so a field can differ a lot from its parish average.",
+        "The numbers are the soil survey's typical values from field surveys and lab samples. They are not measurements of a particular field.",
+        "Some survey areas cover parts of two parishes, and those values are shared between them.",
+        "Liming, fertiliser, drainage and flooding change pH, organic matter and salinity locally. A soil test is the reliable guide for a field.",
     ]
     for key, col, label, unit, dec, cuts, labs, colors, desc in PROPS:
         cats = [{"key": f"s{k}", "label": labs[k], "note": "", "color": colors[k]} for k in range(5)] + [{"key": "not_rated", "label": "No data", "note": "", "color": "#bdbdbd"}]
@@ -225,7 +225,7 @@ def build(gdf, data):
         payload = {"label": label, "title": f"{label} of the soil, by parish", "subtitle": f"USDA soil survey (SSURGO), average of the top {TOP_CM} cm",
                    "source": "USDA NRCS Soil Survey Geographic Database (SSURGO)", "demo": False, "build": BUILD, "categories": cats,
                    "rank": {"high": f"Highest {label.lower()}", "low": f"Lowest {label.lower()}", "note": f"Ranked by {label.lower()}."},
-                   "how": (f"Each parish is coloured by its average {desc}, from the official USDA soil survey, for the top {TOP_CM} cm of soil. Each map unit is weighted by its area."),
+                   "how": (f"The average {desc} in each parish for the top {TOP_CM} cm of soil, from the USDA soil survey. Each map unit is weighted by its area."),
                    "limits": limits, "credits": credits, "parishes": parishes}
         if col in ("clay", "sand"):
             payload["chart"] = {"kind": "bars", "unit": "%", "x": ["Clay", "Silt", "Sand"], "caption": "Soil texture, top 30 cm (%)", "top": "", "bottom": ""}
@@ -257,9 +257,8 @@ def build(gdf, data):
         "label": "Drainage class", "title": "Natural soil drainage, by parish", "subtitle": "The drainage class that covers the most land, USDA soil survey",
         "source": "USDA NRCS Soil Survey Geographic Database (SSURGO)", "demo": False, "build": BUILD, "categories": cats,
         "rank": {"high": "Most poorly drained soil", "low": "Least poorly drained soil", "note": "Ranked by the share of poorly or very poorly drained soil."},
-        "how": ("Each parish is coloured by the natural drainage class that covers most of its soil: how fast water leaves the soil in its natural state, "
-                "from excessively drained (sandy, dries quickly) to very poorly drained (wet most of the year). Click a parish for every class."),
-        "limits": limits + ["Natural drainage describes the soil before ditches, tile or levees. Many Louisiana fields are drained or flooded on purpose, for example rice."],
+        "how": ("The natural drainage class that covers most of each parish's soil. Drainage goes from excessively drained (sandy, dries quickly) to very poorly drained (wet most of the year). Click a parish to see every class."),
+        "limits": limits + ["Natural drainage describes the soil before ditches, tile or levees. Many Louisiana fields are drained or flooded on purpose, rice for example."],
         "credits": credits, "parishes": parishes})
 
 

@@ -114,9 +114,9 @@ def build(gdf, months, root, surf, source):
     xlab = [MON[months[t][1] - 1] for t in steps]
     credits = [{"text": "Soil moisture: NASA SMAP L4 (SPL4SMGP), NSIDC DAAC", "url": "https://nsidc.org/data/spl4smgp"}, BOUNDARY_CREDIT]
     common_limits = [
-        "The values come from NASA's SMAP Level-4 product, which blends satellite observations into a land model. They are estimates, not measurements at depth.",
-        "The SMAP record starts in 2015, so \"normal\" rests on a few earlier years and rankings are coarse.",
-        "The grid is about 9 km. It suits parish averages, not individual fields. Coastal parishes include a lot of water and wetland.",
+        "The values come from NASA SMAP Level 4, which feeds satellite readings into a land model. They are modelled estimates and not measurements at depth.",
+        "The record starts in 2015, so normal rests on a few earlier years and the rankings are coarse.",
+        "The grid is about 9 km, so it works for parish averages and not for single fields. Coastal parishes include a lot of water and wetland.",
     ]
 
     # ---------------------------------------------------------------- surface soil moisture
@@ -135,7 +135,7 @@ def build(gdf, months, root, surf, source):
         hist = [asf[t] for t in steps]
         parishes[ids[i]] = {
             "name": row["name"], "cat": cat, "rv": round(float(pct[i]), 1), "big": f"{pct[i]:.0f}%",
-            "big_note": f"of normal surface soil moisture, {ym_text(label)}", "tip": f"{names[cat]} · {pct[i]:.0f}% of normal",
+            "big_note": f"of normal surface soil moisture, {ym_text(label)}", "tip": f"{names[cat]}, {pct[i]:.0f}% of normal",
             "rows": [["Surface (0–5 cm)", f"{cur[i]:.2f} m³/m³"], [f"Normal for {MON[m - 1]}", f"{normal[i]:.2f} m³/m³"],
                      ["Root zone (0–100 cm)", f"{root[T][i]:.2f} m³/m³"], ["Earlier years that were drier", f"{round(pctile[i] / 100 * n)} of {n}"]],
             "v": [None if h is None else round(float(h[2][i] - 100), 1) for h in hist],
@@ -143,14 +143,13 @@ def build(gdf, months, root, surf, source):
     rows_m = [(f"{months[t][0]}-{months[t][1]:02d}", ym_text(f"{months[t][0]}-{months[t][1]:02d}"), list(asf[t][2]),
                [None if np.isnan(x) else smap.wetness_category(x) for x in asf[t][3]]) for t in range(len(months)) if asf[t] is not None]
     write_months("soilsurf", ids, rows_m, cat_keys, "not_rated", "against the same month in earlier years since 2015", "{v}%",
-                 "of normal surface soil moisture, {label}", "{cat} · {v}% of normal", "Surface soil moisture as % of normal")
+                 "of normal surface soil moisture, {label}", "{cat}, {v}% of normal", "Surface soil moisture as % of normal")
     write_layer("soilsurf", {
         "label": "Surface soil moisture", "title": "Surface soil moisture (0–5 cm) compared with normal",
         "subtitle": f"{ym_text(label)}, against {MON[m - 1]} in {n} earlier years", "source": source, "demo": False, "build": BUILD, "categories": cats,
         "rank": {"high": "Wettest compared with normal", "low": "Driest compared with normal", "note": "Ranked by surface soil moisture as a percentage of normal."},
-        "how": ("The top 5 cm of soil is what a seed or a seedling first meets. It dries and rewets within days, so it can swing far from the root zone. "
-                "Each parish shows the monthly average for that top layer compared with the same month in every other year since 2015."),
-        "limits": common_limits + ["The surface layer reacts to single rains and hot spells; one month's average can hide a wet week and a dry week."],
+        "how": ("The top 5 cm of soil is what a seed or seedling meets first. It dries out and wets up within days, so it can be far from the root zone. This shows the monthly average for that layer compared with the same month in every year since 2015."),
+        "limits": common_limits + ["The surface layer reacts to single rains and hot spells, so a monthly average can hide a wet week and a dry week."],
         "credits": credits,
         "chart": {"kind": "diverging", "cap": 50, "unit": "% vs normal", "x": xlab, "caption": "Past 12 months, surface layer", "top": "wetter than normal", "bottom": "drier"},
         "parishes": parishes})
@@ -175,7 +174,7 @@ def build(gdf, months, root, surf, source):
         parishes[ids[i]] = {
             "name": row["name"], "cat": cat, "rv": round(float(now[i]), 1), "big": f"{abs(now[i]):.0f} mm",
             "big_note": f"{word} the normal amount of water in the top metre of soil, {ym_text(label)}",
-            "tip": f"{dnames[cat]} · {abs(now[i]):.0f} mm {word} normal",
+            "tip": f"{dnames[cat]}, {abs(now[i]):.0f} mm {word} normal",
             "rows": [["Water in the top metre", f"{cur_r[i] * 1000:.0f} mm"], [f"Normal for {MON[m - 1]}", f"{normal_r[i] * 1000:.0f} mm"],
                      ["Difference", f"{now[i]:+.0f} mm"]],
             "v": [None if mm(t) is None or np.isnan(mm(t)[i]) else round(float(mm(t)[i]), 1) for t in steps],
@@ -183,15 +182,14 @@ def build(gdf, months, root, surf, source):
     rows_m = [(f"{months[t][0]}-{months[t][1]:02d}", ym_text(f"{months[t][0]}-{months[t][1]:02d}"), list(mm(t)),
                [None if np.isnan(x) else def_category(x) for x in mm(t)]) for t in range(len(months)) if mm(t) is not None]
     write_months("soildef", ids, rows_m, [c["key"] for c in dcats], "not_rated", "against the same month in earlier years since 2015", "{v} mm",
-                 "of water above (+) or below (−) normal in the top metre of soil, {label}", "{cat} · {v} mm", "Water above (+) or below (−) normal, mm",
+                 "of water above (+) or below (−) normal in the top metre of soil, {label}", "{cat}, {v} mm", "Water above (+) or below (−) normal, mm",
                  offset=0, suffix=" mm", decimals=0, plus=True)
     write_layer("soildef", {
         "label": "Soil-water deficit", "title": "Soil-water deficit in the top metre of soil",
         "subtitle": f"{ym_text(label)}, against {MON[m - 1]} in {n_r} earlier years", "source": source, "demo": False, "build": BUILD, "categories": dcats,
         "rank": {"high": "Most water above normal", "low": "Largest deficit", "note": "Ranked by millimetres of water above normal (negative = deficit)."},
-        "how": ("This turns the soil-moisture percentage into an amount of water: how many millimetres more or less the top metre of soil holds than "
-                "its normal for this month (soil moisture in m³/m³ times 1,000 mm). A deficit of 40 mm is roughly an inch and a half of rain missing from the soil."),
-        "limits": common_limits + ["It is a difference from the average of the earlier SMAP years, not from the soil's field capacity or wilting point. It does not say whether a crop is short of water.",
+        "how": ("The soil moisture percentage turned into an amount of water: how many millimetres more or less the top metre of soil holds than it normally does for this month (moisture in m³/m³ times 1,000 mm). A deficit of 40 mm is about an inch and a half of rain missing from the soil."),
+        "limits": common_limits + ["It is a difference from the average of the earlier SMAP years. It is not measured against the soil's field capacity or wilting point, and it does not say whether a crop is short of water.",
                                    "Roots do not reach the whole metre in every crop or in every soil."],
         "credits": credits,
         "chart": {"kind": "diverging", "cap": 100, "unit": "mm vs normal", "x": xlab, "caption": "Water above or below normal, past 12 months (mm)", "top": "more water than normal", "bottom": "deficit"},
@@ -212,7 +210,7 @@ def build(gdf, months, root, surf, source):
         cat = gap_category(now[i])
         parishes[ids[i]] = {
             "name": row["name"], "cat": cat, "rv": round(float(now[i]), 1), "big": f"{now[i]:+.0f}",
-            "big_note": f"points: surface rank minus root-zone rank, {ym_text(label)}", "tip": f"{gnames[cat]} · {now[i]:+.0f} points",
+            "big_note": f"points: surface rank minus root-zone rank, {ym_text(label)}", "tip": f"{gnames[cat]}, {now[i]:+.0f} points",
             "rows": [["Surface ranks wetter than", f"{asf[T][3][i]:.0f}% of earlier years"], ["Root zone ranks wetter than", f"{ar[T][3][i]:.0f}% of earlier years"],
                      ["Gap (surface minus root zone)", f"{now[i]:+.0f} points"]],
             "v": [None if gap(t) is None or np.isnan(gap(t)[i]) else round(float(gap(t)[i]), 1) for t in steps],
@@ -220,16 +218,14 @@ def build(gdf, months, root, surf, source):
     rows_m = [(f"{months[t][0]}-{months[t][1]:02d}", ym_text(f"{months[t][0]}-{months[t][1]:02d}"), list(gap(t)),
                [None if np.isnan(x) else gap_category(x) for x in gap(t)]) for t in range(len(months)) if gap(t) is not None]
     write_months("soilgap", ids, rows_m, [c["key"] for c in GAP_CATS], "not_rated", "against the same month in earlier years since 2015", "{v}",
-                 "points: surface rank minus root-zone rank, {label}", "{cat} · {v} points", "Surface rank minus root-zone rank (points)",
+                 "points: surface rank minus root-zone rank, {label}", "{cat}, {v} points", "Surface rank minus root-zone rank (points)",
                  offset=0, suffix=" points", decimals=0, plus=True)
     write_layer("soilgap", {
         "label": "Surface–root-zone gap", "title": "Gap between surface and root-zone soil moisture",
         "subtitle": f"{ym_text(label)}, ranks against {MON[m - 1]} in {n_r} earlier years", "source": source, "demo": False, "build": BUILD, "categories": GAP_CATS,
         "rank": {"high": "Surface wetter than root zone", "low": "Surface drier than root zone", "note": "Ranked by surface rank minus root-zone rank (percentile points)."},
-        "how": ("Each parish gets two ranks for the month, one for the top 5 cm and one for the top metre, each against the same month in earlier years (0 = driest, 100 = wettest). "
-                "The map shows the surface rank minus the root-zone rank. A strongly negative gap means the surface has dried out while the deeper soil still holds water, "
-                "which is how a quick dry spell often begins; a strongly positive gap means a recent rain wetted the surface over a deeper store that is still short."),
-        "limits": common_limits + ["The two ranks come from the same model and are not independent. A big gap in one month is a prompt to look at the other layers, not a verdict."],
+        "how": ("Each parish gets two ranks for the month, one for the top 5 cm and one for the top metre, each against the same month in earlier years (0 is driest, 100 is wettest). The map shows the surface rank minus the root-zone rank. A strongly negative gap means the surface has dried while the deeper soil still holds water, which is how a quick dry spell often starts. A strongly positive gap means a recent rain wet the surface over a deeper store that is still short."),
+        "limits": common_limits + ["Both ranks come from the same model, so they are not independent. A big gap in one month is a reason to look at the other layers and not a verdict."],
         "credits": credits,
         "chart": {"kind": "diverging", "cap": 100, "unit": "points", "x": xlab, "caption": "Surface rank minus root-zone rank, past 12 months", "top": "surface wetter", "bottom": "surface drier"},
         "parishes": parishes})

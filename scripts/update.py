@@ -6,6 +6,7 @@ LaCADIAN site - run every layer that is due.
   rainfall     every run: gridMET daily rain by parish (gridmet.py), then the rainfall layer and the dry-spell layer
   temperature and evaporative demand   every run: gridMET daily temperature and ET0 (gridmet_extra.py), then climate.py
   soil moisture, vegetation   every run, if a NASA Earthdata login is available
+  river flow   every run: USGS gauges (streamflow.py); a failure is only a note, the earlier map is kept
   check        after those: compares gridMET and SMAP with the stations (validate.py)
   Drought Monitor   every run
   crops        when never built, or CDL=true, or when a new CDL year may be out (February onwards, once a year)
@@ -80,6 +81,7 @@ if flag("FLOOD") or is_old("flood", "flood.py"):
     jobs.append(("flood risk", ["flood.py"]))
 else:
     print("Skipping flood risk: already built.")
+jobs.append(("river and streamflow (USGS)", ["streamflow.py"]))
 if flag("WATER") or is_old("water", "water.py"):
     jobs.append(("surface water change", ["water.py"]))
 else:
@@ -92,6 +94,8 @@ for name, cmd in jobs:
         # a download that failed while an earlier record is kept is not a failure of the run: the layers are built from the record
         if cmd[0] == "gridmet.py" and (ROOT / "cache" / "gridmet_rain.npz").exists():
             notes.append(f"{name}: the newest data could not be downloaded this time; the earlier record was used and it will be tried again next run.")
+        elif cmd[0] == "streamflow.py":
+            notes.append(f"{name}: could not be built this time (the USGS service did not answer or returned nothing). The earlier map is kept and it will be tried again next run.")
         else:
             failed.append(name)
 

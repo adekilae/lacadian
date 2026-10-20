@@ -197,7 +197,7 @@ def build(gdf, dates, rain):
             rows.append([f"Last month ({MON[m - 1]})", f"{one[0][i]:.0f} mm" + (f" ({one[0][i] / nm * 100:.0f}% of normal)" if nm > 0 else "")])
         parishes[pid] = {
             "name": row["name"], "cat": cat, "big": f"{pct[i]:.0f}%",
-            "big_note": f"of normal rainfall, {label}", "tip": f"{names[cat]} · {pct[i]:.0f}% of normal",
+            "big_note": f"of normal rainfall, {label}", "tip": f"{names[cat]}, {pct[i]:.0f}% of normal",
             "rows": rows, "rv": round(float(pct[i]), 1),
             "v": [None if (h is None or np.isnan(h[2][i]) or h[1][i] <= 0) else round(float(h[0][i] / h[1][i] * 100 - 100), 1) for h in hist],
             "c": ["not_rated" if (h is None or np.isnan(h[2][i])) else wetness_category(h[2][i]) for h in hist],
@@ -211,21 +211,19 @@ def build(gdf, dates, rain):
         yy, mm = ym_of(e)
         rows_m.append((f"{yy}-{mm:02d}", month_label(e), list(pc), [None if np.isnan(x) else wetness_category(x) for x in pt]))
     write_months("rain", list(gdf["id"]), rows_m, [c["key"] for c in cats], "not_rated", "against the same months in 1991–2020",
-                 "{v}%", "of normal rainfall, {label}", "{cat} · {v}% of normal", "Rain as % of normal")
+                 "{v}%", "of normal rainfall, {label}", "{cat}, {v}% of normal", "Rain as % of normal")
     write_layer("rain", {
         "label": "Rainfall", "title": "Rainfall compared with normal", "subtitle": f"{label}, against the same months in 1991–2020",
         "source": "gridMET daily precipitation, averaged by parish", "demo": False, "build": BUILD, "categories": cats,
         "validation": "rain",
         "rank": {"high": "Wettest compared with normal", "low": "Driest compared with normal", "note": "Ranked by rain as a percentage of normal."},
-        "how": (f"Each parish shows the rain that fell over the last three complete months ({label}) compared with the same three months in each of "
-                "the 30 years from 1991 to 2020. \"Very dry\" means this year ranks among the driest 10% of those years; \"dry\" the driest 30%; "
-                "and the same in reverse for \"wet\" and \"very wet\". Click a parish for the amounts and the last 12 months."),
+        "how": (f"Rain over the last three complete months ({label}) compared with the same three months in each year from 1991 to 2020. A parish is \"very dry\" when this year is among the driest 10% of those years and \"dry\" when it is among the driest 30%. Wet works the same way in the other direction."),
         "limits": [
-            "gridMET is a 4 km grid made by blending PRISM, which is built from rain gauges, with a land-model reanalysis. It is an estimate, not a gauge reading.",
-            "The value for a parish is the mean of the grid cells inside it. A storm that hit part of a large parish is smoothed out.",
-            "The newest days are provisional and are revised for a few weeks. A month is used only when every day of it is in the record.",
-            "Rain amounts are compared with the 1991–2020 normal, which was a particular 30 years. They do not say whether the soil or crops are short of water.",
-            "The 'Check against the stations' table under the map compares gridMET with the rain gauges of the LaCADIAN stations where both have data.",
+            "The values come from gridMET, a 4 km grid that mixes PRISM (built from rain gauges) with a land model. It is an estimate of rain, not a gauge reading.",
+            "A parish value is the average of the grid cells inside it, so a storm over part of a big parish gets smoothed out.",
+            "The newest days are provisional and get revised for a few weeks. A month only counts when every day is in the record.",
+            "Normal here means 1991 to 2020. The map says nothing about whether soil or crops are short of water.",
+            "The table under the map compares gridMET with the station gauges where both have data.",
         ],
         "credits": [{"text": "Rainfall: gridMET, Abatzoglou, J.T. (2013), Int. J. Climatology 33: 121-131", "url": "https://www.climatologylab.org/gridmet.html"}, BOUNDARY_CREDIT],
         "chart": {"kind": "diverging", "cap": 100, "unit": "% vs normal", "x": [MON[ym_of(end - HISTORY_MONTHS + 1 + k)[1] - 1] for k in range(HISTORY_MONTHS)],
