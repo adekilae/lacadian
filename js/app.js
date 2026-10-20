@@ -357,6 +357,7 @@
     initMap(); initText(); drawMarkers(); drawLegend(); drawTable();
   }
 
+  if (window.LACADIAN_DATA) { boot(window.LACADIAN_DATA); return; }
   fetch("data/stations.json?v=" + Date.now()).then(function (r) {
     if (!r.ok) throw new Error("HTTP " + r.status);
     return r.json();
