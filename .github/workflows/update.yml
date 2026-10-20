@@ -21,10 +21,12 @@ jobs:
         run: pip install numpy
       - name: Build data/stations.json
         run: python scripts/stations.py --repo _source
+      - name: Make data/stations.js for opening the page without a server
+        run: python -c "import json;d=json.load(open('data/stations.json'));open('data/stations.js','w').write('window.LACADIAN_DATA='+json.dumps(d,separators=(',',':'))+';')"
       - name: Commit if changed
         run: |
           git config user.name "lacadian-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/stations.json
+          git add data/stations.json data/stations.js
           git diff --cached --quiet || git commit -m "Update station data"
           git push
