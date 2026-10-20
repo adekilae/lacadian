@@ -340,6 +340,8 @@ def build(gdf, have, lat, lon, source, today):
                   "caption": "Past 12 months, root zone", "top": "wetter than normal", "bottom": "drier"},
         "parishes": parishes,
     })
+    import soilextra                                # surface, deficit and gap layers from the same monthly means
+    soilextra.build(gdf, months, root, surf, source)
 
 
 if __name__ == "__main__":

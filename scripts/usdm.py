@@ -144,7 +144,13 @@ def self_test():
     csvtext = "MapDate,FIPS,County,State,None,D0,D1,D2,D3,D4\n2026-10-13,22001,Acadia,LA,50,50,0,0,0,0\n"
     r2 = parse(csvtext)
     assert r2[0]["date"] == "2026-10-13" and r2[0]["d0"] == 50
-    print("self-test passed: 3 groups")
+    T, F = True, False
+    assert drought_state([F, F, T, T, T]) == ("new", 3, 0, False)
+    assert drought_state([T] * 12 + [F, T])[:2] == ("new", 1) and drought_state([F] + [T] * 20)[:2] == ("est", 20)
+    assert drought_state([F] + [T] * 30)[0] == "long" and drought_state([T] * 30)[3] is True
+    assert drought_state([T, T, F, F, F]) == ("rec", 0, 3, False) and drought_state([T] + [F] * 20)[0] == "none" and drought_state([F] * 5)[0] == "none"
+    assert drought_state([T, None])[0] == "not_rated" and drought_state([])[0] == "not_rated"
+    print("self-test passed: 4 groups")
 
 
 def main():
@@ -210,6 +216,91 @@ def make_payload(gdf, by, weeks, latest):
     return payload, n_drought
 
 
+ONSET_CATS = [
+    {"key": "long", "label": "Long-lived drought", "note": "in drought (D1 or worse over 25%+ of the parish) for more than 26 weeks", "color": "#7f0000"},
+    {"key": "est", "label": "Established drought", "note": "9 to 26 weeks in drought", "color": "#d6604d"},
+    {"key": "new", "label": "New drought", "note": "8 weeks or fewer in drought", "color": "#fdb863"},
+    {"key": "rec", "label": "Recovering", "note": "out of drought for up to 12 weeks after being in it", "color": "#8cc9a9"},
+    {"key": "none", "label": "No recent drought", "note": "not in drought for the past 12 weeks", "color": "#f1ede0"},
+    {"key": "not_rated", "label": "No data", "note": "", "color": "#bdbdbd"},
+]
+RECOVER_WEEKS = 12
+
+
+def drought_state(flags):
+    """flags: list of True/False/None per week, oldest first, the last entry being the map week.
+    -> (category key, weeks in drought now, weeks since the last drought week, record starts inside the run)"""
+    if not flags or flags[-1] is None:
+        return "not_rated", 0, None, False
+    if flags[-1]:
+        n = 0
+        for f in reversed(flags):
+            if f:
+                n += 1
+            else:
+                break
+        cut = n == len(flags)                                 # the run reaches the start of the record: "at least"
+        return ("long" if n > 26 else "est" if n > 8 else "new"), n, 0, cut
+    since = None
+    for k, f in enumerate(reversed(flags)):
+        if f:
+            since = k
+            break
+    if since is not None and since <= RECOVER_WEEKS:
+        return "rec", 0, since, False
+    return "none", 0, since, False
+
+
+def make_onset(gdf, by, weeks, latest):
+    """Drought onset and recovery for the map week `latest`: how long each parish has been in drought, or how long it has been out."""
+    use = [w for w in weeks if w <= latest]
+    when = dt.date.fromisoformat(latest)
+    names = {c["key"]: c["label"] for c in ONSET_CATS}
+    parishes = {}
+    for i, row in gdf.iterrows():
+        pid = row["id"]
+        flags = [None if by.get((pid, w)) is None else by[(pid, w)][1] >= SHARE for w in use]
+        cat, n, since, cut = drought_state(flags)
+        if cat == "not_rated":
+            parishes[pid] = {"name": row["name"], "cat": cat, "big": "–", "tip": "No data", "rv": None, "rows": [],
+                             "big_note": "The Drought Monitor returned nothing for this parish."}
+            continue
+        start = use[len(use) - n] if n else None
+        if n:
+            big, note = f"{'≥' if cut else ''}{n} wk", f"in drought (D1 or worse over {SHARE:.0f}%+ of the parish), since the map of {dt.date.fromisoformat(start):%d %b %Y}"
+        elif cat == "rec":
+            big, note = f"{since} wk", "since the parish was last in drought (D1 or worse over 25%+ of its area)"
+        else:
+            big, note = "None", "No drought (D1 or worse over 25%+ of the parish) in the last 12 weeks" if since is None or since > RECOVER_WEEKS else ""
+        d1 = [by.get((pid, w)) for w in use[-12:]]
+        parishes[pid] = {
+            "name": row["name"], "cat": cat, "rv": float(n), "big": big, "big_note": note + f", map of {when.day} {when:%b %Y}" if n else note,
+            "tip": f"{names[cat]}" + (f" · {n} weeks" if n else ""),
+            "rows": [["Weeks in drought now", f"{'at least ' if cut else ''}{n}" if n else "0"],
+                     ["Weeks since last in drought", "–" if n else ("not in the record" if since is None else str(since))],
+                     ["Area in D1 or worse, this week", f"{by[(pid, latest)][1]:.0f}%"]],
+            "v": [None if h is None else round(h[1], 1) for h in d1],
+            "bc": ["#b8c4bd" if h is None else ("#d6604d" if h[1] >= SHARE else "#c9d3cc") for h in d1]}
+    payload = {
+        "label": "Drought onset and recovery", "title": "Drought onset and recovery",
+        "subtitle": f"Weekly Drought Monitor maps up to {when.day} {when:%b %Y}", "source": "US Drought Monitor, National Drought Mitigation Center (University of Nebraska-Lincoln), USDA and NOAA",
+        "demo": False, "build": BUILD, "categories": ONSET_CATS,
+        "rank": {"high": "Longest in drought", "low": "Shortest or no drought", "note": "Ranked by weeks in drought now."},
+        "how": (f"A parish counts as \"in drought\" in a week when D1 (moderate drought) or worse covers at least {SHARE:.0f}% of it. The map counts how many weeks in a row it has been in drought, "
+                f"or, if it is out, how long ago the drought ended. \"New\" is 8 weeks or fewer, \"established\" 9 to 26, \"long-lived\" more than 26. \"Recovering\" means out of drought for up to {RECOVER_WEEKS} weeks."),
+        "limits": [
+            "This only re-reads the weekly Drought Monitor maps, so it inherits their limits: they are drawn by experts from many sources and describe mostly long-term dryness.",
+            f"The 25% rule is ours. A drought covering less of a parish does not count, and a parish that sits near the line can flip between weeks.",
+            f"Only about {HISTORY_YEARS} years of weekly maps are kept, so a count that reaches the start of the record is shown as \"at least\".",
+            "A parish being out of drought is not a forecast that it will stay out.",
+        ],
+        "credits": [{"text": "US Drought Monitor, National Drought Mitigation Center at the University of Nebraska-Lincoln, the USDA and NOAA", "url": "https://droughtmonitor.unl.edu/"}, BOUNDARY_CREDIT],
+        "chart": {"kind": "bars", "unit": "%", "x": [f"{int(w[8:])} {dt.date.fromisoformat(w):%b}" for w in use[-12:]],
+                  "caption": "Share of the parish in D1 or worse, last 12 weeks (red: counted as in drought)", "top": "", "bottom": ""},
+        "parishes": parishes}
+    return payload
+
+
 def build(gdf, recs):
     weeks = sorted({r["date"] for r in recs})
     by = {(r["fips"], r["date"]): cumulative(r) for r in recs}
@@ -227,6 +318,11 @@ def build(gdf, recs):
         write_layer("usdm", pl, period=ym, period_label=f"{MONTHS[m - 1]} {y}")
         n += 1
     print(f"Wrote {n} month-by-month maps")
+    # drought onset and recovery: the same weekly records, read as a count of weeks
+    write_layer("usdm_onset", make_onset(gdf, by, weeks, weeks[-1]))
+    for ym, w in sorted(last.items()):
+        y, m = int(ym[:4]), int(ym[5:7])
+        write_layer("usdm_onset", make_onset(gdf, by, [x for x in weeks if x <= w], w), period=ym, period_label=f"{MONTHS[m - 1]} {y}")
 
 
 if __name__ == "__main__":

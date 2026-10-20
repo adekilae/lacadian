@@ -37,7 +37,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import common  # noqa: E402
 from common import BOUNDARY_CREDIT, CACHE, DATA, SOURCE, get_url, load_parishes, write_layer  # noqa: E402
 
-BUILD = 2
+BUILD = 3
 
 # ---- settings you may want to change -------------------------------------
 ENDPOINT = "https://nassgeodata.gmu.edu/axis2/services/CDLService/GetCDLStat"
@@ -346,6 +346,77 @@ def build_year(gdf, stats, emit, base):
     print("Wrote data/crops-by-parish.csv")
 
 
+LAND = {"Cropland": None, "Grass and pasture": [176], "Forest": [141, 142, 143], "Wetland": [87, 190, 195],
+        "Developed": [121, 122, 123, 124], "Open water": [111]}
+LAND_CATS = [
+    {"key": "loss2", "label": "Cropland share down 5+ points", "note": "", "color": "#762a83"},
+    {"key": "loss1", "label": "Cropland share down 1 to 5 points", "note": "", "color": "#c2a5cf"},
+    {"key": "stable", "label": "About the same", "note": "within 1 point", "color": "#f1ede0"},
+    {"key": "gain1", "label": "Cropland share up 1 to 5 points", "note": "", "color": "#a6dba0"},
+    {"key": "gain2", "label": "Cropland share up 5+ points", "note": "", "color": "#1b7837"},
+    {"key": "not_rated", "label": "No data", "note": "missing in the first or the last year", "color": "#bdbdbd"},
+]
+
+
+def land_category(pp):
+    return "loss2" if pp <= -5 else "loss1" if pp <= -1 else "stable" if pp < 1 else "gain1" if pp < 5 else "gain2"
+
+
+def land_shares(stat):
+    """Share (0-100) of the mapped area in each land-cover group, or None when nothing is mapped."""
+    mapped = float(sum(stat.values()))
+    if mapped <= 0:
+        return None
+    out = {}
+    for name, cl in LAND.items():
+        a = float(sum(v for c, v in stat.items() if c in CROP)) if cl is None else acres(stat, cl)
+        out[name] = a / mapped * 100
+    return out
+
+
+def landcover(gdf, stats):
+    """Land-cover change between the first and the last CDL year we hold: headline = change in the cropland share of the parish."""
+    years = sorted(stats)
+    if len(years) < 2:
+        print("Land-cover change needs two CDL years; skipped.")
+        return
+    y0, y1 = years[0], years[-1]
+    names = {c["key"]: c["label"] for c in LAND_CATS}
+    parishes = {}
+    for _, row in gdf.iterrows():
+        pid = row["id"]
+        a, b = (land_shares(stats[y0][pid]) if pid in stats[y0] else None), (land_shares(stats[y1][pid]) if pid in stats[y1] else None)
+        if a is None or b is None:
+            parishes[pid] = {"name": row["name"], "cat": "not_rated", "big": "–", "tip": "No data", "rv": None, "rows": [], "big_note": "No CDL numbers for this parish in the first or last year."}
+            continue
+        d = b["Cropland"] - a["Cropland"]
+        series = []
+        for y in years:
+            sh = land_shares(stats[y][pid]) if pid in stats[y] else None
+            series.append(None if sh is None else round(sh["Cropland"], 2))
+        rows = [[f"{n} share, {y0} → {y1}", f"{a[n]:.1f}% → {b[n]:.1f}% ({b[n] - a[n]:+.1f} points)"] for n in LAND]
+        cat = land_category(d)
+        parishes[pid] = {
+            "name": row["name"], "cat": cat, "rv": round(float(d), 2), "big": f"{d:+.1f}",
+            "big_note": f"points: change in the share of the parish that is cropland, {y0} to {y1}", "tip": f"{names[cat]} · {d:+.1f} points",
+            "rows": rows, "v": series, "bc": ["#b8c4bd" if v is None else "#4d8f6c" for v in series]}
+    write_layer("landcover", {
+        "label": "Land-cover change", "title": f"Land-cover change, {y0} to {y1}", "subtitle": f"Change in the share of each parish that is cropland, {y0} to {y1}",
+        "source": "USDA National Agricultural Statistics Service, Cropland Data Layer", "demo": False, "build": BUILD, "categories": LAND_CATS,
+        "rank": {"high": "Largest rise in cropland share", "low": "Largest fall in cropland share", "note": "Ranked by the change in cropland share (percentage points)."},
+        "how": (f"The Cropland Data Layer maps every 30 m cell of the state each year. For each parish this layer takes the share of mapped land that is cropland (including fallow and orchards) in {y0} and in {y1} and shows the difference in percentage points. "
+                "Click a parish to see how the shares of grass and pasture, forest, wetland, developed land and open water changed over the same years."),
+        "limits": [
+            "The Cropland Data Layer is built mainly to map crops. Its non-crop classes (forest, wetland, developed) are less accurate than its crop classes.",
+            "Only a few years are compared. A change of a point or two can be map error or a different mix of crops and fallow in one year, not a lasting change in land use.",
+            "A rise in cropland share does not say what the land was before, and a fall does not say what it became. The other rows give a hint, not proof.",
+            "Wetland and open-water shares move with the weather in the mapping year as well as with real change.",
+        ],
+        "credits": [{"text": "USDA National Agricultural Statistics Service, Cropland Data Layer", "url": "https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php"}, BOUNDARY_CREDIT],
+        "chart": {"kind": "bars", "unit": "%", "x": [str(y) for y in years], "caption": "Cropland share of the parish by year (%)", "top": "", "bottom": ""},
+        "parishes": parishes})
+
+
 def build(gdf, stats):
     """Latest year -> data/<layer>.json; every year (including the latest) -> data/<layer>@<year>.json for the year picker."""
     years = sorted(stats)
@@ -356,6 +427,7 @@ def build(gdf, stats):
             if y == years[-1]:
                 write_layer(key, payload)
         build_year(gdf, part, emit, base=(y == years[-1]))
+    landcover(gdf, stats)
 
 
 def pick_years(gdf, today):
@@ -454,9 +526,14 @@ def self_test():
         for k in GROUPS:
             assert (Path(tmp) / f"crop_{k}.json").exists()
         assert (Path(tmp) / "crops-by-parish.csv").exists()
+        lc = json.loads((Path(tmp) / "landcover.json").read_text())
+        assert lc["parishes"]["22001"]["cat"] in ("stable", "gain1", "loss1", "gain2", "loss2") and lc["parishes"]["22013"]["cat"] == "not_rated"
+        assert len(lc["parishes"]["22001"]["rows"]) == 6
+    assert land_category(-6) == "loss2" and land_category(-1) == "loss1" and land_category(0.5) == "stable" and land_category(1) == "gain1" and land_category(5) == "gain2"
+    assert abs(land_shares({3: 50, 176: 25, 141: 25})["Cropland"] - 50) < 1e-9 and land_shares({}) is None
     common.DATA = old
     globals()["DATA"] = old
-    print("self-test passed: 4 groups")
+    print("self-test passed: 5 groups")
 
 
 if __name__ == "__main__":

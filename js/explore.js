@@ -10,19 +10,20 @@
   const CROPS = ["crops", "crop_rice", "crop_cane", "crop_soy", "crop_corn", "crop_cotton", "crop_sweetpotato", "crop_wheat", "crop_pasture", "crop_aqua"];
   const SOILP = ["soilph", "soilom", "soilclay", "soilsand", "soilbd", "soildrain"];
   const CATS = [
-    { id: "c1", title: "Climate & weather", items: [{ k: "rain" }, { k: "dryspell" }, { p: "Air temperature anomaly" }, { p: "Evaporative demand (ET₀)" }] },
-    { id: "c2", title: "Soil & hydrology", items: [{ k: "soil" }, { p: "Surface soil moisture (0–5 cm)" }, { p: "Root-zone model (pCC)" }, { p: "Soil-water deficit" }] },
-    { id: "c3", title: "Drought", items: [{ k: "usdm" }, { p: "Drought onset and recovery" }, { p: "Surface–root-zone drought gap" }] },
+    { id: "c1", title: "Climate & weather", items: [{ k: "rain" }, { k: "dryspell" }, { k: "airtemp" }, { k: "et0" }] },
+    { id: "c2", title: "Soil & hydrology", items: [{ k: "soil" }, { k: "soilsurf" }, { p: "Root-zone model (pCC)" }, { k: "soildef" }] },
+    { id: "c3", title: "Drought", items: [{ k: "usdm" }, { k: "usdm_onset" }, { k: "soilgap" }] },
     { id: "c4", title: "Agriculture & vegetation", items: [{ k: "cropland" }, { k: "vegetation" }, { sub: "Crops", keys: CROPS }, { sub: "Soil properties", keys: SOILP }, { p: "Crop water stress" }] },
     { id: "c5", title: "Water & flooding", items: [{ k: "flood" }, { k: "water" }, { p: "River and streamflow" }, { p: "Rainfall recharge effectiveness" }] },
-    { id: "c6", title: "Land & coastal", items: [{ p: "Land-cover change" }, { p: "Wetland and coastal vegetation change" }, { p: "Coastal salinity stress" }] },
+    { id: "c6", title: "Land & coastal", items: [{ k: "landcover" }, { p: "Wetland and coastal vegetation change" }, { p: "Coastal salinity stress" }] },
   ];
   const TABS = [
     ["Overview", ["rain", "soil", "usdm", "dryspell", "vegetation", "flood", "water", "cropland"]],
-    ["Climate", ["rain", "dryspell"]],
-    ["Soil & drought", ["soil", "usdm"].concat(SOILP)],
+    ["Climate", ["rain", "dryspell", "airtemp", "et0"]],
+    ["Soil & drought", ["soil", "soilsurf", "soildef", "soilgap", "usdm", "usdm_onset"].concat(SOILP)],
     ["Agriculture", ["cropland", "vegetation"].concat(CROPS)],
     ["Water", ["flood", "water"]],
+    ["Land", ["landcover", "cropland"]],
   ];
   const PLAIN = ["rain", "soil", "usdm", "dryspell", "vegetation", "flood", "water"];
 

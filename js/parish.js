@@ -5,11 +5,12 @@
   const CH = LC.charts;
   const $ = id => document.getElementById(id);
   const SECTIONS = [
-    ["Climate & weather", ["rain", "dryspell"]],
-    ["Soil & hydrology", ["soil"]],
-    ["Drought", ["usdm"]],
+    ["Climate & weather", ["rain", "dryspell", "airtemp", "et0"]],
+    ["Soil & hydrology", ["soil", "soilsurf", "soildef", "soilgap"]],
+    ["Drought", ["usdm", "usdm_onset"]],
     ["Agriculture & vegetation", ["cropland", "crops", "crop_rice", "crop_cane", "crop_soy", "crop_corn", "crop_cotton", "crop_sweetpotato", "crop_wheat", "crop_pasture", "crop_aqua", "vegetation", "soilph", "soilom", "soilclay", "soilsand", "soilbd", "soildrain"]],
     ["Water & flooding", ["flood", "water"]],
+    ["Land cover", ["landcover"]],
   ];
   const PLAIN = ["rain", "soil", "usdm", "dryspell", "vegetation", "flood", "water"];
 

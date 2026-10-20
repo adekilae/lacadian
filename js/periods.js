@@ -20,13 +20,14 @@
       const p = o.parishes[id], mp = M.parishes[id];
       if (!mp) return;
       const v = mp.v[i], cat = M.cats[mp.k[i]];
+      const off = M.offset == null ? 100 : M.offset, suf = M.suffix == null ? "%" : M.suffix, sv = v == null ? "" : (M.plus && v > 0 ? "+" : "") + v;
       p.cat = cat; p.rv = v;
-      p.big = v == null ? "–" : M.big.replace("{v}", v);
+      p.big = v == null ? "–" : M.big.replace("{v}", sv);
       p.big_note = v == null ? "Not rated for this period." : M.note.replace("{label}", label);
-      p.tip = v == null ? (catLabel[cat] || "Not rated") : M.tip.replace("{cat}", catLabel[cat] || "").replace("{v}", v);
-      p.rows = [["Period", label], [M.value_label, v == null ? "n/a" : v + "%"]];
+      p.tip = v == null ? (catLabel[cat] || "Not rated") : M.tip.replace("{cat}", catLabel[cat] || "").replace("{v}", sv);
+      p.rows = [["Period", label], [M.value_label, v == null ? "n/a" : sv + suf]];
       delete p.table;
-      p.v = mp.v.slice(from, i + 1).map(x => x == null ? null : x - 100);
+      p.v = mp.v.slice(from, i + 1).map(x => x == null ? null : Math.round((x - off) * 100) / 100);
       p.c = mp.k.slice(from, i + 1).map(k => M.cats[k]);
       counts[cat] = (counts[cat] || 0) + 1;
     });

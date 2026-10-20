@@ -39,7 +39,13 @@ LAYERS = [
     ("rain", "Rainfall", "drought", None),
     ("soil", "Soil moisture", "drought", None),
     ("dryspell", "Dry spells", "drought", None),
+    ("airtemp", "Air temperature", "drought", None),
+    ("et0", "Evaporative demand", "drought", None),
+    ("soilsurf", "Surface soil moisture", "drought", None),
+    ("soildef", "Soil-water deficit", "drought", None),
+    ("soilgap", "Surface–root-zone gap", "drought", None),
     ("usdm", "Drought Monitor", "drought", None),
+    ("usdm_onset", "Drought onset and recovery", "drought", None),
     ("cropland", "Cropland", "agriculture", None),
     ("crops", "Main crops", "agriculture", None),
     ("crop_rice", "Rice", "agriculture", ("crop", "Crops", "Crop")),
@@ -60,6 +66,7 @@ LAYERS = [
     ("vegetation", "Vegetation", "land", None),
     ("flood", "Flood risk", "land", None),
     ("water", "Surface water change", "land", None),
+    ("landcover", "Land-cover change", "land", None),
 ]
 
 BOUNDARY_CREDIT = {"text": "Parish boundaries: US Census Bureau cartographic boundary files (public domain)",
@@ -214,23 +221,25 @@ def write_json(name, obj):
     _write_pair(DATA / name, obj)
 
 
-def write_months(key, parish_ids, rows, cat_keys, fallback, basis, big, note, tip, value_label):
+def write_months(key, parish_ids, rows, cat_keys, fallback, basis, big, note, tip, value_label, offset=100, suffix="%", decimals=0, plus=False):
     """Save data/<key>_months.json: the layer's indicator for every month in its record, so the site can show or download any month.
 
     rows: [(month 'YYYY-MM', label text, values per parish (percent of normal, or None/NaN), category key per parish (or None))]
     cat_keys: every category key a month can have; `fallback` is used where a parish has no category.
-    big / note / tip: text templates with {v}, {label}, {cat} filled in by the page."""
+    big / note / tip: text templates with {v}, {label}, {cat} filled in by the page.
+    offset: the value that is drawn as zero in the 12-month chart (100 for percent of normal, 0 for a difference); suffix: unit text after
+    the value in the pop-up; decimals: places kept; plus: show a + sign before positive values."""
     parishes = {}
     for j, pid in enumerate(parish_ids):
         v, k = [], []
         for _, _, vals, cats in rows:
             x = vals[j]
-            v.append(None if x is None or x != x else int(round(float(x))))
+            v.append(None if x is None or x != x else (int(round(float(x))) if decimals == 0 else round(float(x), decimals)))
             k.append(cat_keys.index(cats[j] or fallback))
         parishes[pid] = {"v": v, "k": k}
     write_json(f"{key}_months.json", {
         "key": key, "months": [r[0] for r in rows], "labels": [r[1] for r in rows], "cats": cat_keys, "basis": basis,
-        "big": big, "note": note, "tip": tip, "value_label": value_label, "parishes": parishes})
+        "big": big, "note": note, "tip": tip, "value_label": value_label, "offset": offset, "suffix": suffix, "plus": plus, "parishes": parishes})
     print(f"Wrote data/{key}_months.json: {len(rows)} months")
 
 

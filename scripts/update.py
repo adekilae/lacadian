@@ -4,6 +4,7 @@ LaCADIAN site - run every layer that is due.
 
   stations     every run, from a checkout of the LaCADIAN data repository (LACADIAN_SRC, default "_source")
   rainfall     every run: gridMET daily rain by parish (gridmet.py), then the rainfall layer and the dry-spell layer
+  temperature and evaporative demand   every run: gridMET daily temperature and ET0 (gridmet_extra.py), then climate.py
   soil moisture, vegetation   every run, if a NASA Earthdata login is available
   check        after those: compares gridMET and SMAP with the stations (validate.py)
   Drought Monitor   every run
@@ -55,7 +56,9 @@ if Path(src).exists():
 else:
     print(f"Skipping stations: no checkout of the LaCADIAN data repository at '{src}'.")
 jobs.append(("rainfall data (gridMET)", ["gridmet.py"]))
+jobs.append(("temperature and evaporative-demand data (gridMET)", ["gridmet_extra.py"]))
 jobs.append(("rainfall layer", ["rain.py"]))
+jobs.append(("air temperature and evaporative demand", ["climate.py"]))
 jobs.append(("dry spells", ["dryspell.py"]))
 if earthdata:
     jobs += [("soil moisture (SMAP)", ["smap.py"]), ("vegetation", ["vegetation.py"])]
@@ -82,15 +85,21 @@ if flag("WATER") or is_old("water", "water.py"):
 else:
     print("Skipping surface water change: already built.")
 
-failed = []
+failed, notes = [], []
 for name, cmd in jobs:
     print(f"\n===== {name} =====", flush=True)
     if subprocess.run([sys.executable, str(HERE / cmd[0])] + cmd[1:]).returncode != 0:
-        failed.append(name)
+        # a download that failed while an earlier record is kept is not a failure of the run: the layers are built from the record
+        if cmd[0] == "gridmet.py" and (ROOT / "cache" / "gridmet_rain.npz").exists():
+            notes.append(f"{name}: the newest data could not be downloaded this time; the earlier record was used and it will be tried again next run.")
+        else:
+            failed.append(name)
 
 from common import write_manifest  # noqa: E402
 write_manifest()                                   # refresh the list of tabs even if a layer failed
 
+for n in notes:
+    print("\nNote: " + n)
 if failed:
     sys.exit(f"\nThese layers failed: {', '.join(failed)}. The others were updated.")
 print("\nAll layers updated.")
