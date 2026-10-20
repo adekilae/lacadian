@@ -44,7 +44,7 @@
       f.className = "foot";
       f.innerHTML = `<div class="wrap"><p>Station data: LaCADIAN network (Louisiana Climate &amp; Digital Ag Network), LSU Soil Hydrology and Remote Sensing (SHaRE) Lab; stated as CC BY-NC 4.0, for academic and non-commercial use.
         Satellite and gridded layers: NASA, USDA, FEMA, JRC and University of Idaho sources, credited on each map. Parish boundaries: US Census Bureau.
-        Map tiles: © OpenStreetMap contributors © CARTO.</p>
+        Basemap: Esri, HERE, Garmin, OpenStreetMap contributors.</p>
         <p><a href="${ROOT}pages/methods.html">Data and methods</a> · <a href="${ROOT}pages/about.html">About this prototype</a></p></div>`;
     }
   }

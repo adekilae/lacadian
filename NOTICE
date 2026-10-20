@@ -6,4 +6,4 @@ Soil moisture: NASA SMAP Level 4. Vegetation: NASA VIIRS VNP13A3.
 Drought: US Drought Monitor (National Drought Mitigation Center, USDA, NOAA).
 Crops: USDA NASS Cropland Data Layer. Soils: USDA NRCS SSURGO.
 Flood risk: FEMA National Risk Index. Surface water: European Commission JRC Global Surface Water.
-Boundaries: US Census Bureau. Map tiles: (c) OpenStreetMap contributors, (c) CARTO. Imagery: Esri, Maxar. Map library: Leaflet (BSD-2-Clause).
+Boundaries: US Census Bureau. Basemap and imagery: Esri (World Light Gray Canvas, World Imagery), HERE, Garmin, Maxar, OpenStreetMap contributors. Map library: Leaflet (BSD-2-Clause).

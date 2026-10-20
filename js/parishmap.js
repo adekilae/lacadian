@@ -52,9 +52,9 @@
 
   // ---------------------------------------------------------------- the map
   const map = L.map("map", { zoomSnap: 0.25, attributionControl: false, scrollWheelZoom: false });
-  const street = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { subdomains: "abcd", maxZoom: 12, opacity: 0.55 }).addTo(map);
+  const street = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", { maxZoom: 12, maxNativeZoom: 10, opacity: 0.9 }).addTo(map);
   const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 12 });
-  L.control.attribution({ prefix: false }).addAttribution("© OpenStreetMap © CARTO · Imagery: Esri, Maxar").addTo(map);
+  L.control.attribution({ prefix: false }).addAttribution("Basemap and imagery: Esri, HERE, Garmin, Maxar, OpenStreetMap contributors").addTo(map);
   let SAT = false;
   function basemap(on) {
     SAT = on;
