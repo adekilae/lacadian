@@ -5,7 +5,8 @@
    "label": "Rainfall",
    "page": "drought",
    "file": "data/rain.json",
-   "built": false
+   "built": true,
+   "updated": "2026-10-20"
   },
   {
    "key": "soil",
@@ -19,118 +20,131 @@
    "label": "Dry spells",
    "page": "drought",
    "file": "data/dryspell.json",
-   "built": false
+   "built": true,
+   "updated": "2026-10-20"
   },
   {
    "key": "usdm",
    "label": "Drought Monitor",
    "page": "drought",
    "file": "data/usdm.json",
-   "built": false
+   "built": true,
+   "updated": "2026-10-20"
   },
   {
    "key": "cropland",
    "label": "Cropland",
    "page": "agriculture",
    "file": "data/cropland.json",
-   "built": false
+   "built": true,
+   "updated": "2026-10-20"
   },
   {
    "key": "crops",
    "label": "Main crops",
    "page": "agriculture",
    "file": "data/crops.json",
-   "built": false
+   "built": true,
+   "updated": "2026-10-20"
   },
   {
    "key": "crop_rice",
    "label": "Rice",
    "page": "agriculture",
    "file": "data/crop_rice.json",
-   "built": false,
+   "built": true,
    "group": "crop",
    "group_tab": "Crops",
-   "group_label": "Crop"
+   "group_label": "Crop",
+   "updated": "2026-10-20"
   },
   {
    "key": "crop_cane",
    "label": "Sugarcane",
    "page": "agriculture",
    "file": "data/crop_cane.json",
-   "built": false,
+   "built": true,
    "group": "crop",
    "group_tab": "Crops",
-   "group_label": "Crop"
+   "group_label": "Crop",
+   "updated": "2026-10-20"
   },
   {
    "key": "crop_soy",
    "label": "Soybeans",
    "page": "agriculture",
    "file": "data/crop_soy.json",
-   "built": false,
+   "built": true,
    "group": "crop",
    "group_tab": "Crops",
-   "group_label": "Crop"
+   "group_label": "Crop",
+   "updated": "2026-10-20"
   },
   {
    "key": "crop_corn",
    "label": "Corn",
    "page": "agriculture",
    "file": "data/crop_corn.json",
-   "built": false,
+   "built": true,
    "group": "crop",
    "group_tab": "Crops",
-   "group_label": "Crop"
+   "group_label": "Crop",
+   "updated": "2026-10-20"
   },
   {
    "key": "crop_cotton",
    "label": "Cotton",
    "page": "agriculture",
    "file": "data/crop_cotton.json",
-   "built": false,
+   "built": true,
    "group": "crop",
    "group_tab": "Crops",
-   "group_label": "Crop"
+   "group_label": "Crop",
+   "updated": "2026-10-20"
   },
   {
    "key": "crop_sweetpotato",
    "label": "Sweet potatoes",
    "page": "agriculture",
    "file": "data/crop_sweetpotato.json",
-   "built": false,
+   "built": true,
    "group": "crop",
    "group_tab": "Crops",
-   "group_label": "Crop"
+   "group_label": "Crop",
+   "updated": "2026-10-20"
   },
   {
    "key": "crop_wheat",
    "label": "Wheat",
    "page": "agriculture",
    "file": "data/crop_wheat.json",
-   "built": false,
+   "built": true,
    "group": "crop",
    "group_tab": "Crops",
-   "group_label": "Crop"
+   "group_label": "Crop",
+   "updated": "2026-10-20"
   },
   {
    "key": "crop_pasture",
    "label": "Grass, pasture and hay",
    "page": "agriculture",
    "file": "data/crop_pasture.json",
-   "built": false,
+   "built": true,
    "group": "crop",
    "group_tab": "Crops",
-   "group_label": "Crop"
+   "group_label": "Crop",
+   "updated": "2026-10-20"
   },
   {
    "key": "crop_aqua",
    "label": "Aquaculture",
    "page": "agriculture",
    "file": "data/crop_aqua.json",
-   "built": false,
+   "built": true,
    "group": "crop",
    "group_tab": "Crops",
-   "group_label": "Crop"
+   "group_label": "Crop",
+   "updated": "2026-10-20"
   },
   {
    "key": "soilph",
@@ -211,7 +225,8 @@
    "label": "Surface water change",
    "page": "land",
    "file": "data/water.json",
-   "built": false
+   "built": true,
+   "updated": "2026-10-20"
   }
  ]
 }
