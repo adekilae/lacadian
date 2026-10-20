@@ -151,60 +151,66 @@
    "label": "Soil pH",
    "page": "agriculture",
    "file": "data/soilph.json",
-   "built": false,
+   "built": true,
    "group": "soil",
    "group_tab": "Soil",
-   "group_label": "Soil property"
+   "group_label": "Soil property",
+   "updated": "2026-10-20"
   },
   {
    "key": "soilom",
    "label": "Organic matter",
    "page": "agriculture",
    "file": "data/soilom.json",
-   "built": false,
+   "built": true,
    "group": "soil",
    "group_tab": "Soil",
-   "group_label": "Soil property"
+   "group_label": "Soil property",
+   "updated": "2026-10-20"
   },
   {
    "key": "soilclay",
    "label": "Clay",
    "page": "agriculture",
    "file": "data/soilclay.json",
-   "built": false,
+   "built": true,
    "group": "soil",
    "group_tab": "Soil",
-   "group_label": "Soil property"
+   "group_label": "Soil property",
+   "updated": "2026-10-20"
   },
   {
    "key": "soilsand",
    "label": "Sand",
    "page": "agriculture",
    "file": "data/soilsand.json",
-   "built": false,
+   "built": true,
    "group": "soil",
    "group_tab": "Soil",
-   "group_label": "Soil property"
+   "group_label": "Soil property",
+   "updated": "2026-10-20"
   },
   {
    "key": "soilbd",
    "label": "Bulk density",
    "page": "agriculture",
    "file": "data/soilbd.json",
-   "built": false,
+   "built": true,
    "group": "soil",
    "group_tab": "Soil",
-   "group_label": "Soil property"
+   "group_label": "Soil property",
+   "updated": "2026-10-20"
   },
   {
    "key": "soildrain",
    "label": "Drainage class",
    "page": "agriculture",
    "file": "data/soildrain.json",
-   "built": false,
+   "built": true,
    "group": "soil",
    "group_tab": "Soil",
-   "group_label": "Soil property"
+   "group_label": "Soil property",
+   "updated": "2026-10-20"
   },
   {
    "key": "vegetation",
