@@ -58,8 +58,11 @@ def load(name):
     f = cache_file(name)
     if not f.exists():
         return None
-    z = np.load(f, allow_pickle=False)
-    return {k: z[k] for k in z.files}
+    z = np.load(f, allow_pickle=True)          # our own file; the first version stored the parish list as an object array
+    out = {k: z[k] for k in z.files}
+    out["dates"] = out["dates"].astype(str)
+    out["parish_ids"] = out["parish_ids"].astype(str)
+    return out
 
 
 def url_for(host, name, year, var, end):
@@ -163,7 +166,7 @@ def main():
             finally:
                 Path(path).unlink(missing_ok=True)
             ds, vals = merge(old, d, p)
-            old = {"dates": np.array(ds), "parish_ids": np.array(gdf["id"]), "values": vals}
+            old = {"dates": np.array(ds, dtype=str), "parish_ids": np.array(list(gdf["id"]), dtype=str), "values": vals}
             np.savez_compressed(cache_file(name), dates=old["dates"], parish_ids=old["parish_ids"], values=vals)
             print(f"  {name} {year}: {len(d)} days read, record now {ds[0]} to {ds[-1]}", flush=True)
         if old is None:
