@@ -6,6 +6,8 @@
    "page": "drought",
    "file": "data/rain.json",
    "built": true,
+   "months": true,
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -14,6 +16,8 @@
    "page": "drought",
    "file": "data/soil.json",
    "built": true,
+   "months": true,
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -22,6 +26,8 @@
    "page": "drought",
    "file": "data/dryspell.json",
    "built": true,
+   "months": false,
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -30,6 +36,68 @@
    "page": "drought",
    "file": "data/usdm.json",
    "built": true,
+   "months": false,
+   "periods": [
+    "2026-10",
+    "2026-09",
+    "2026-08",
+    "2026-07",
+    "2026-06",
+    "2026-05",
+    "2026-04",
+    "2026-03",
+    "2026-02",
+    "2026-01",
+    "2025-12",
+    "2025-11",
+    "2025-10",
+    "2025-09",
+    "2025-08",
+    "2025-07",
+    "2025-06",
+    "2025-05",
+    "2025-04",
+    "2025-03",
+    "2025-02",
+    "2025-01",
+    "2024-12",
+    "2024-11",
+    "2024-10",
+    "2024-09",
+    "2024-08",
+    "2024-07",
+    "2024-06",
+    "2024-05",
+    "2024-04",
+    "2024-03",
+    "2024-02",
+    "2024-01",
+    "2023-12",
+    "2023-11",
+    "2023-10",
+    "2023-09",
+    "2023-08",
+    "2023-07",
+    "2023-06",
+    "2023-05",
+    "2023-04",
+    "2023-03",
+    "2023-02",
+    "2023-01",
+    "2022-12",
+    "2022-11",
+    "2022-10",
+    "2022-09",
+    "2022-08",
+    "2022-07",
+    "2022-06",
+    "2022-05",
+    "2022-04",
+    "2022-03",
+    "2022-02",
+    "2022-01",
+    "2021-12"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -38,6 +106,14 @@
    "page": "agriculture",
    "file": "data/cropland.json",
    "built": true,
+   "months": false,
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -46,6 +122,14 @@
    "page": "agriculture",
    "file": "data/crops.json",
    "built": true,
+   "months": false,
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -54,9 +138,17 @@
    "page": "agriculture",
    "file": "data/crop_rice.json",
    "built": true,
+   "months": false,
    "group": "crop",
    "group_tab": "Crops",
    "group_label": "Crop",
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -65,9 +157,17 @@
    "page": "agriculture",
    "file": "data/crop_cane.json",
    "built": true,
+   "months": false,
    "group": "crop",
    "group_tab": "Crops",
    "group_label": "Crop",
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -76,9 +176,17 @@
    "page": "agriculture",
    "file": "data/crop_soy.json",
    "built": true,
+   "months": false,
    "group": "crop",
    "group_tab": "Crops",
    "group_label": "Crop",
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -87,9 +195,17 @@
    "page": "agriculture",
    "file": "data/crop_corn.json",
    "built": true,
+   "months": false,
    "group": "crop",
    "group_tab": "Crops",
    "group_label": "Crop",
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -98,9 +214,17 @@
    "page": "agriculture",
    "file": "data/crop_cotton.json",
    "built": true,
+   "months": false,
    "group": "crop",
    "group_tab": "Crops",
    "group_label": "Crop",
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -109,9 +233,17 @@
    "page": "agriculture",
    "file": "data/crop_sweetpotato.json",
    "built": true,
+   "months": false,
    "group": "crop",
    "group_tab": "Crops",
    "group_label": "Crop",
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -120,9 +252,17 @@
    "page": "agriculture",
    "file": "data/crop_wheat.json",
    "built": true,
+   "months": false,
    "group": "crop",
    "group_tab": "Crops",
    "group_label": "Crop",
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -131,9 +271,17 @@
    "page": "agriculture",
    "file": "data/crop_pasture.json",
    "built": true,
+   "months": false,
    "group": "crop",
    "group_tab": "Crops",
    "group_label": "Crop",
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -142,9 +290,17 @@
    "page": "agriculture",
    "file": "data/crop_aqua.json",
    "built": true,
+   "months": false,
    "group": "crop",
    "group_tab": "Crops",
    "group_label": "Crop",
+   "periods": [
+    "2025",
+    "2024",
+    "2023",
+    "2022",
+    "2021"
+   ],
    "updated": "2026-10-20"
   },
   {
@@ -153,9 +309,11 @@
    "page": "agriculture",
    "file": "data/soilph.json",
    "built": true,
+   "months": false,
    "group": "soil",
    "group_tab": "Soil",
    "group_label": "Soil property",
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -164,9 +322,11 @@
    "page": "agriculture",
    "file": "data/soilom.json",
    "built": true,
+   "months": false,
    "group": "soil",
    "group_tab": "Soil",
    "group_label": "Soil property",
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -175,9 +335,11 @@
    "page": "agriculture",
    "file": "data/soilclay.json",
    "built": true,
+   "months": false,
    "group": "soil",
    "group_tab": "Soil",
    "group_label": "Soil property",
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -186,9 +348,11 @@
    "page": "agriculture",
    "file": "data/soilsand.json",
    "built": true,
+   "months": false,
    "group": "soil",
    "group_tab": "Soil",
    "group_label": "Soil property",
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -197,9 +361,11 @@
    "page": "agriculture",
    "file": "data/soilbd.json",
    "built": true,
+   "months": false,
    "group": "soil",
    "group_tab": "Soil",
    "group_label": "Soil property",
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -208,9 +374,11 @@
    "page": "agriculture",
    "file": "data/soildrain.json",
    "built": true,
+   "months": false,
    "group": "soil",
    "group_tab": "Soil",
    "group_label": "Soil property",
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -219,6 +387,8 @@
    "page": "land",
    "file": "data/vegetation.json",
    "built": true,
+   "months": true,
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -227,6 +397,8 @@
    "page": "land",
    "file": "data/flood.json",
    "built": true,
+   "months": false,
+   "periods": [],
    "updated": "2026-10-20"
   },
   {
@@ -235,6 +407,8 @@
    "page": "land",
    "file": "data/water.json",
    "built": true,
+   "months": false,
+   "periods": [],
    "updated": "2026-10-20"
   }
  ]
