@@ -42,7 +42,8 @@ jobs:
       - name: Install packages
         run: pip install -r requirements.txt
       - name: Restore download cache
-        uses: actions/cache@v4
+        id: cache
+        uses: actions/cache/restore@v4
         with:
           path: cache
           key: lacadian-cache-${{ github.run_id }}
@@ -57,6 +58,12 @@ jobs:
           FLOOD: ${{ inputs.flood }}
           WATER: ${{ inputs.water }}
         run: python scripts/update.py
+      - name: Save download cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: cache
+          key: lacadian-cache-${{ github.run_id }}
       - name: Commit if changed
         if: always()
         run: |
