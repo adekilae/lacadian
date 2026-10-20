@@ -143,6 +143,28 @@ def get_url(url, tries=4, timeout=120, **kw):
     raise last
 
 
+def earthdata_login(tries=4):
+    """Log in to NASA Earthdata from EARTHDATA_USERNAME / EARTHDATA_PASSWORD (or EARTHDATA_TOKEN). Exits with a plain message."""
+    import os
+    import sys
+    import time
+    import earthaccess
+    if not (os.environ.get("EARTHDATA_TOKEN") or (os.environ.get("EARTHDATA_USERNAME") and os.environ.get("EARTHDATA_PASSWORD"))):
+        sys.exit("No NASA Earthdata login: set the repository secrets EARTHDATA_USERNAME and EARTHDATA_PASSWORD.")
+    last = None
+    for attempt in range(1, tries + 1):
+        try:
+            auth = earthaccess.login(strategy="environment")
+            if auth is not None and getattr(auth, "authenticated", True):
+                return auth
+            last = RuntimeError("login was refused (check the username and password)")
+        except Exception as e:
+            last = e
+        if attempt < tries:
+            time.sleep(10 * attempt)
+    sys.exit(f"Could not log in to NASA Earthdata: {type(last).__name__} {str(last)[:200]}")
+
+
 # ---------------------------------------------------------------------------- writing layers
 def _write_pair(path_json, obj, compact=True):
     """Write data/x.json and data/x.js. The .js copy lets the pages work when index.html is opened straight from disk."""

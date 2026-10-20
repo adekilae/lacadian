@@ -61,10 +61,21 @@ def read_table(blob, name=""):
     """Bytes of the NRI county table (a zip holding the CSV, or the CSV) -> {5-digit FIPS: row} for Louisiana."""
     if blob[:2] == b"PK":
         z = zipfile.ZipFile(io.BytesIO(blob))
-        member = next(n for n in z.namelist() if n.lower().endswith(".csv") and "data dictionary" not in n.lower() and "dictionary" not in n.lower())
-        text = z.read(member).decode("utf-8-sig", errors="replace")
+        text = None
+        for n in z.namelist():
+            if not n.lower().endswith(".csv"):
+                continue
+            t = z.read(n).decode("utf-8-sig", errors="replace")
+            head = t[:3000].split("\n", 1)[0]
+            if "STCOFIPS" in head or ("STATEFIPS" in head and "COUNTYFIPS" in head):
+                text = t
+                break
+        if text is None:
+            sys.exit("The FEMA zip has no county table inside (files: " + ", ".join(z.namelist())[:300] + ").")
     else:
         text = blob.decode("utf-8-sig", errors="replace")
+        if text.lstrip()[:1] == "<":
+            sys.exit("FEMA returned a web page, not the table. Download the county table by hand and put it in data/source/.")
     out = {}
     for r in csv.DictReader(io.StringIO(text)):
         fips = (r.get("STCOFIPS") or (str(r.get("STATEFIPS", "")).zfill(2) + str(r.get("COUNTYFIPS", "")).zfill(3))).strip().zfill(5)

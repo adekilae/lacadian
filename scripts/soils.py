@@ -109,7 +109,15 @@ def ask(sql):
         try:
             r = requests.post(SDA, json={"query": " ".join(sql.split()), "format": "JSON+COLUMNNAME"}, timeout=300)
             if r.status_code == 200:
-                return parse_table(r.json())
+                try:
+                    js = r.json()
+                except ValueError:
+                    last = RuntimeError("not JSON: " + r.text[:200])
+                    raise last
+                rows = parse_table(js)
+                if not rows:
+                    print("  (empty reply: " + r.text[:200].replace("\n", " ") + ")")
+                return rows
             last = RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
         except Exception as e:
             last = e
@@ -310,7 +318,16 @@ def main():
     if args.self_test:
         return self_test()
     gdf = load_parishes()
-    props, drain, acres = ask(SQL_PROPS), ask(SQL_DRAIN), {r["areasymbol"]: float(r["acres"]) for r in ask(SQL_ACRES)}
+    areas = ask("SELECT areasymbol, areaname FROM legend WHERE areasymbol LIKE 'LA%'")
+    print(f"{len(areas)} Louisiana soil survey areas listed")
+    props, drain, acres = [], [], {}
+    for a in areas:
+        sym = a["areasymbol"]
+        where = f"l.areasymbol = '{sym}'"
+        props += ask(SQL_PROPS.replace("l.areasymbol LIKE 'LA%'", where))
+        drain += ask(SQL_DRAIN.replace("l.areasymbol LIKE 'LA%'", where))
+        for r in ask(SQL_ACRES.replace("l.areasymbol LIKE 'LA%'", where)):
+            acres[r["areasymbol"]] = float(r["acres"])
     if not props:
         sys.exit("Soil Data Access returned no Louisiana soil survey areas.")
     data, unmatched = to_parish(gdf, props, acres, drain)
