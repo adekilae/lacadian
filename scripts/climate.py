@@ -298,7 +298,8 @@ def main():
     import gridmet_extra as ge
     z = {k: ge.load(k) for k in ("tmmx", "tmmn", "pet")}
     if all(v is None for v in z.values()):
-        sys.exit("No temperature or evaporative-demand record yet (run scripts/gridmet_extra.py first).")
+        print("No temperature or evaporative-demand record yet, so these layers are not built. They will appear after gridmet_extra.py has downloaded the data.")
+        return
     gdf = load_parishes()
     t = z["tmmx"], z["tmmn"]
     if t[0] is not None and t[1] is not None:

@@ -28,9 +28,26 @@ from common import BBOX, CACHE, get_url, load_parishes  # noqa: E402
 
 FIRST_YEAR = 1991
 HOSTS = ["https://www.reacchpna.org/thredds/ncss/MET", "http://thredds.northwestknowledge.net:8080/thredds/ncss/MET"]
+AGG = "http://thredds.northwestknowledge.net:8080/thredds/ncss"       # aggregated 1979-now files: a last fallback
 VARS = {"tmmx": ["air_temperature", "daily_maximum_temperature", "tmmx"],
         "tmmn": ["air_temperature", "daily_minimum_temperature", "tmmn"],
         "pet": ["potential_evapotranspiration", "pet"]}
+
+
+class Unreachable(Exception):
+    """Every server refused the connection: no point trying the other years or variables in this run."""
+
+
+def reachable():
+    """True if at least one gridMET server answers at all (a quick check, so an outage costs seconds, not hours)."""
+    import requests
+    for host in HOSTS + [AGG]:
+        try:
+            requests.get(host.split("/thredds")[0] + "/thredds/catalog.html", timeout=20)
+            return True
+        except Exception:
+            continue
+    return False
 
 
 def cache_file(name):
@@ -74,6 +91,22 @@ def download_year(name, year, today):
                 return f.name
             except Exception as e:
                 errors.append(f"{host.split('/')[2]} {var}: {type(e).__name__} {str(e)[:80]}")
+    # last fallback: the aggregated file, asking only for this year
+    for var in VARS[name]:
+        try:
+            u = url_for(AGG, name, year, var, f"{year}-12-31T00:00:00Z" if year < today.year else f"{today.isoformat()}T00:00:00Z")
+            u = u.replace(f"/{name}/{name}_{year}.nc", f"/agg_met_{name}_1979_CurrentYear_CONUS.nc")
+            r = get_url(u, tries=2, timeout=300)
+            if len(r.content) < 2000 or r.content[:3] not in (b"CDF", b"\x89HD"):
+                raise RuntimeError("not a NetCDF file")
+            f = tempfile.NamedTemporaryFile(suffix=".nc", delete=False)
+            f.write(r.content)
+            f.close()
+            return f.name
+        except Exception as e:
+            errors.append(f"aggregated {var}: {type(e).__name__} {str(e)[:60]}")
+    if errors and all(("ConnectionError" in x or "Timeout" in x) for x in errors):
+        raise Unreachable(f"{name} {year}: no gridMET server could be reached.")
     raise RuntimeError(f"{name} {year} could not be downloaded. " + " | ".join(errors))
 
 
@@ -97,6 +130,10 @@ def main():
     today = dt.date.today()
     gdf = load_parishes()
     CACHE.mkdir(exist_ok=True)
+    if not reachable():
+        print("The gridMET servers cannot be reached from here right now (the same outage that stops the rainfall download). "
+              "Nothing was downloaded; this will be tried again next run. Layers already built are kept.")
+        return
     missing = []
     for name in VARS:
         old = load(name)
@@ -114,6 +151,9 @@ def main():
                 continue
             try:
                 path = download_year(name, year, today)
+            except Unreachable as e:
+                print(f"  {e} Stopping the temperature and evaporative-demand download for this run.")
+                return
             except Exception as e:
                 print(f"  {name} {year}: {e}", flush=True)
                 failed.append(year)
