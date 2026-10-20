@@ -1,13 +1,34 @@
-name: Update station data
+name: Update data
 on:
   schedule:
     - cron: "17 9 * * *"
   workflow_dispatch:
+    inputs:
+      cdl:
+        description: "Rebuild crops (USDA Cropland Data Layer)"
+        type: boolean
+        default: false
+      soils:
+        description: "Rebuild soil survey layers"
+        type: boolean
+        default: false
+      flood:
+        description: "Rebuild flood risk"
+        type: boolean
+        default: false
+      water:
+        description: "Rebuild surface water change"
+        type: boolean
+        default: false
 permissions:
   contents: write
+concurrency:
+  group: update-data
+  cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -17,16 +38,31 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install numpy
-        run: pip install numpy
-      - name: Build data/stations.json
-        run: python scripts/stations.py --repo _source
-      - name: Make data/stations.js for opening the page without a server
-        run: python -c "import json;d=json.load(open('data/stations.json'));open('data/stations.js','w').write('window.LACADIAN_DATA='+json.dumps(d,separators=(',',':'))+';')"
+          cache: pip
+      - name: Install packages
+        run: pip install -r requirements.txt
+      - name: Restore download cache
+        uses: actions/cache@v4
+        with:
+          path: cache
+          key: lacadian-cache-${{ github.run_id }}
+          restore-keys: lacadian-cache-
+      - name: Update every layer that is due
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          LACADIAN_SRC: _source
+          CDL: ${{ inputs.cdl }}
+          SOILS: ${{ inputs.soils }}
+          FLOOD: ${{ inputs.flood }}
+          WATER: ${{ inputs.water }}
+        run: python scripts/update.py
       - name: Commit if changed
+        if: always()
         run: |
           git config user.name "lacadian-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/stations.json data/stations.js
-          git diff --cached --quiet || git commit -m "Update station data"
+          git add data
+          git diff --cached --quiet || git commit -m "Update data"
+          git pull --rebase
           git push
