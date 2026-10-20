@@ -218,14 +218,16 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "label": "Vegetation",
    "page": "land",
    "file": "data/vegetation.json",
-   "built": false
+   "built": true,
+   "updated": "2026-10-20"
   },
   {
    "key": "flood",
    "label": "Flood risk",
    "page": "land",
    "file": "data/flood.json",
-   "built": false
+   "built": true,
+   "updated": "2026-10-20"
   },
   {
    "key": "water",
