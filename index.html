@@ -1,68 +1,34 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-root="" data-page="Home">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LaCADIAN | Louisiana Climate &amp; Digital Ag Network</title>
-<meta name="description" content="Soil moisture, rainfall and dry spells from the LaCADIAN field stations across Louisiana. Prototype for review.">
+<title>Louisiana weather, soil and land | LaCADIAN</title>
+<meta name="description" content="Soil moisture, rainfall, crops, soils and flood risk for Louisiana parishes, with the LaCADIAN field stations. Prototype for review.">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/main.css?v=1">
+<link rel="stylesheet" href="css/main.css?v=5">
 </head>
 <body>
-<header class="top">
-  <div class="wrap bar">
-    <div class="brand"><span class="mark" aria-hidden="true"></span><span class="name">LaCADIAN</span></div>
-    <p class="tag">Louisiana Climate &amp; Digital Ag Network</p>
-  </div>
-</header>
-
+<header id="hdr"></header>
 <main class="wrap">
-  <p class="proto"><strong>Prototype for review.</strong> This page is an early draft built from the public LaCADIAN station data. It has not been approved by the network team and should not be used for farm decisions.</p>
-  <p class="stale" id="fresh" hidden></p>
-
-  <h1>What the LaCADIAN stations are measuring now</h1>
-  <p class="lead">Rain and soil moisture at the network's field stations across Louisiana. Choose what to show on the map, then select a station for its recent record.</p>
-
-  <section class="tool" aria-label="Station map">
-    <div class="mapcol">
-      <div class="controls">
-        <label for="mode">Colour stations by</label>
-        <select id="mode"></select>
-      </div>
-      <div id="map" role="application" aria-label="Map of LaCADIAN stations"></div>
-      <ul id="legend" class="legend" aria-label="Map legend"></ul>
-      <p class="mapnote" id="mapnote"></p>
-    </div>
-    <aside class="panel" id="detail" aria-live="polite">
-      <p class="empty">Select a station on the map or in the table to see its soil moisture, rain and dry days.</p>
-    </aside>
-  </section>
-
-  <section class="tablecard">
-    <div class="rowhead">
-      <h2>All stations</h2>
-      <button type="button" id="csv" class="btn">Download this table (CSV)</button>
-    </div>
-    <div class="scroll"><table id="tbl"><thead></thead><tbody></tbody></table></div>
-  </section>
-
-  <section class="notes prose">
-    <h2>How to read this</h2>
-    <p>Soil moisture is the volumetric water content of the soil (m³/m³) measured by a sensor at each depth. Soils differ, so a reading of 0.30 is wet at one station and dry at another. The map therefore compares each station's latest reading with <strong>that station's own record</strong>: "wetter than 70% of days recorded" means that 70% of the days since the station began reporting had a lower value. Stations with under 90 days of record are not ranked.</p>
-    <p>A <strong>dry day</strong> is a day with under 1 mm of rain at the station. Dry days in a row are counted up to the last day with a rainfall reading. These are point measurements at the station, not averages over an area.</p>
-    <h2>Limits</h2>
-    <ul id="limits"></ul>
-    <h2>Credits</h2>
-    <p>Station data: <a href="https://github.com/soil-hydrology/LaCADIAN">LaCADIAN network</a> (Louisiana Climate &amp; Digital Ag Network), LSU Soil Hydrology and Remote Sensing (SHaRE) Lab. The network page states that the data are CC BY-NC 4.0 and for academic and non-commercial use; this prototype keeps that credit. Map: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.</p>
-    <h2>Data quality notes</h2>
-    <ul id="quality"></ul>
-  </section>
+<h1>Louisiana's weather, soil and land, by parish</h1>
+<p class="lead">Measurements from the LaCADIAN field stations, with public satellite and survey data for every parish. Everything on this site is shown as measured or mapped, not as advice.</p>
+<div class="cards" id="cards">
+  <article class="card"><h3>Stations</h3><p>Soil moisture at five depths, rain and dry days, soil temperature and soil conductivity at the network's field stations.</p><p class="state" id="st-state"></p><a class="go" href="pages/stations.html">Open the stations map</a></article>
+  <article class="card"><h3>Drought</h3><p>Rainfall against the 1991–2020 normal, soil moisture from NASA's SMAP satellite, runs of dry days and the US Drought Monitor.</p><p class="state" id="st-drought"></p><a class="go" href="pages/drought.html">Open the drought maps</a></article>
+  <article class="card"><h3>Agriculture</h3><p>Cropland and the main Louisiana crops (rice, sugarcane, soybeans, corn, cotton, sweet potatoes, wheat, pasture and hay, aquaculture), and soil pH, organic matter, clay, sand, bulk density and drainage.</p><p class="state" id="st-agriculture"></p><a class="go" href="pages/agriculture.html">Open the agriculture maps</a></article>
+  <article class="card"><h3>Land and flood</h3><p>Vegetation greenness, long-term flood risk and change in surface water.</p><p class="state" id="st-land"></p><a class="go" href="pages/land.html">Open the land and flood maps</a></article>
+</div>
+<section class="card notes">
+  <h2>What this is</h2>
+  <p>An unofficial prototype, built from public data by a graduate student for review by the LaCADIAN network team. The station maps use the network's public data. The parish maps use public data from NASA, USDA, NOAA-funded gridMET, the US Drought Monitor, FEMA and the European Commission's JRC. The stations are also used to check the gridded rainfall and the satellite soil moisture; the results are on the <a href="pages/methods.html">Methods</a> page.</p>
+  <p>It does not tell anyone when to plant, irrigate or spray.</p>
+</section>
 </main>
-
-<footer class="foot"><div class="wrap"><p id="foot"></p></div></footer>
-
+<footer id="ftr"></footer>
 <script src="vendor/leaflet.js"></script>
-<script src="data/stations.js"></script>
-<script src="js/app.js?v=2"></script>
+<script src="js/site.js?v=5"></script>
+<script src="js/home.js?v=5"></script>
+
 </body>
 </html>

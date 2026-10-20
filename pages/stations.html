@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-root="../" data-page="Stations">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stations | LaCADIAN</title>
+<meta name="description" content="Rain, soil moisture, soil temperature and conductivity at the LaCADIAN field stations.">
+<link rel="stylesheet" href="../vendor/leaflet.css">
+<link rel="stylesheet" href="../css/main.css?v=5">
+</head>
+<body>
+<header id="hdr"></header>
+<main class="wrap">
+<h1>What the LaCADIAN stations are measuring now</h1>
+<p class="lead">Rain, soil moisture, soil temperature and soil conductivity at the network's field stations across Louisiana. Choose what to show on the map, then select a station for its recent record.</p>
+<p class="stale" id="fresh" hidden></p>
+<section class="tool" aria-label="Station map" style="margin-top:12px">
+  <div class="mapcol">
+    <div class="controls">
+      <label for="mode">Colour stations by</label>
+      <select id="mode"></select>
+    </div>
+    <div id="map" role="application" aria-label="Map of LaCADIAN stations"></div>
+    <ul id="legend" class="legend round" aria-label="Map legend"></ul>
+    <p class="mapnote" id="mapnote"></p>
+  </div>
+  <aside class="panel" id="detail" aria-live="polite">
+    <p class="empty">Select a station on the map or in the table to see its soil moisture, rain, temperature and conductivity.</p>
+  </aside>
+</section>
+<section class="tablecard">
+  <div class="rowhead">
+    <h2>All stations</h2>
+    <button type="button" id="csv" class="btn">Download this table (CSV)</button>
+  </div>
+  <div class="scroll"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+</section>
+<section class="card notes">
+  <h2>How to read this</h2>
+  <p>Soil moisture is the volumetric water content of the soil (m³/m³) measured by a sensor at each depth. Soils differ, so a reading of 0.30 is wet at one station and dry at another. The map therefore compares each station's latest reading with <strong>that station's own record</strong>: "wetter than 70% of its record" means that 70% of the days since the station began reporting had a lower value. Stations with under 90 days of record are not ranked.</p>
+  <p>A <strong>dry day</strong> is a day with under 1 mm of rain at the station. Dry days in a row are counted up to the last day with a rainfall reading. These are point measurements, not averages over an area.</p>
+  <p>Soil temperature is in °C. Soil conductivity is in dS/m (the network publishes mS/cm, which is the same number).</p>
+  <h2>Limits</h2><ul id="limits"></ul>
+  <h2>Credits</h2>
+  <p>Station data: <a href="https://github.com/soil-hydrology/LaCADIAN">LaCADIAN network</a> (Louisiana Climate &amp; Digital Ag Network), LSU Soil Hydrology and Remote Sensing (SHaRE) Lab. The LSU AgCenter page states the data licence as CC BY-NC 4.0, academic and non-commercial use. Map: © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions">CARTO</a>.</p>
+  <h2>Data quality notes</h2><ul id="quality"></ul>
+</section>
+</main>
+<footer id="ftr"></footer>
+<script src="../vendor/leaflet.js"></script>
+<script src="../js/site.js?v=5"></script>
+<script src="../js/stations.js?v=5"></script>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" data-root="../" data-page="Methods">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data and methods | LaCADIAN</title>
+<meta name="description" content="Sources, methods and limits of every LaCADIAN map.">
+<link rel="stylesheet" href="../vendor/leaflet.css">
+<link rel="stylesheet" href="../css/main.css?v=5">
+</head>
+<body>
+<header id="hdr"></header>
+<main class="wrap">
+<h1>Data and methods</h1>
+<p class="lead">Where every number comes from, how it is calculated, and what it cannot tell you.</p>
+<section class="card notes">
+<h2>Sources</h2>
+<div class="scroll"><table style="min-width:720px"><thead><tr><th>Maps</th><th>Source</th><th>How it is used</th><th>Refreshed</th></tr></thead><tbody>
+<tr><td>Stations</td><td>LaCADIAN network public data, LSU SHaRE Lab</td><td>Daily station files. Latest values, each station's own record for ranks, last 7 and 30 days of rain, dry days under 1 mm.</td><td>Daily, when the network publishes</td></tr>
+<tr><td>Rainfall, Dry spells</td><td>gridMET daily precipitation (University of Idaho), 4 km grid</td><td>Rain averaged over each parish's grid cells. Rainfall: last 3 complete months against the same months in 1991–2020. Dry spells: longest run under 1 mm in the last 60 days against the same window in 1991–2020; differences under 2 days are shown as normal.</td><td>Daily</td></tr>
+<tr><td>Soil moisture</td><td>NASA SMAP Level 4 (SPL4SMGP), 9 km</td><td>Root-zone soil moisture per parish, ranked against the parish's own record.</td><td>Daily (needs a NASA Earthdata login)</td></tr>
+<tr><td>Drought Monitor</td><td>US Drought Monitor, county (parish) statistics</td><td>Worst category covering at least a quarter of the parish.</td><td>Weekly</td></tr>
+<tr><td>Cropland, Main crops, Crops</td><td>USDA NASS Cropland Data Layer</td><td>Acres of each crop class per parish, from the latest published year. Classification is from satellite imagery and has errors, larger for small fields and minor crops.</td><td>Yearly</td></tr>
+<tr><td>Soil</td><td>USDA NRCS SSURGO soil survey, Soil Data Access</td><td>Area-weighted topsoil values per parish: pH, organic matter, clay, sand, bulk density, and the share of land in each drainage class.</td><td>Rarely</td></tr>
+<tr><td>Vegetation</td><td>NASA VIIRS vegetation index (VNP13A3), monthly 1 km</td><td>Greenness per parish against the same month in earlier years.</td><td>Monthly</td></tr>
+<tr><td>Flood risk</td><td>FEMA National Risk Index</td><td>The index's riverine and coastal flood ratings for each parish. A county-level planning index, not a flood map for any field.</td><td>When FEMA updates</td></tr>
+<tr><td>Surface water change</td><td>JRC Global Surface Water</td><td>Share of the parish where open water was gained or lost between the earlier and later periods of the dataset.</td><td>Rarely</td></tr>
+<tr><td>Boundaries</td><td>US Census Bureau</td><td>Parish outlines.</td><td></td></tr>
+</tbody></table></div>
+<h2>Checking the grids against the stations</h2>
+<p>The network's stations are not used to draw the parish maps. They are used to check them. The Rainfall and Soil moisture tabs each show a table underneath the map: gridMET rain against each station's gauge (daily and weekly correlation, ratio of totals, agreement on rain days), and SMAP soil moisture against the station sensors (rank correlation and difference). Treat the tables as a first test with short records, not proof.</p>
+<h2>What this site does not do</h2>
+<ul><li>It gives no advice on when to plant, irrigate, spray or insure.</li>
+<li>Parish values are averages. A field in a wet parish can be dry.</li>
+<li>Gridded and satellite values are estimates; gauges and sensors are points. Neither is the truth for a particular field.</li>
+<li>Layers not yet built show as dashed tabs. Nothing here is example data.</li></ul>
+<h2>Station data quality notes</h2><ul id="quality"></ul>
+</section>
+</main>
+<footer id="ftr"></footer>
+<script src="../vendor/leaflet.js"></script>
+<script src="../js/site.js?v=5"></script>
+<script>LC.getData("data/stations.json").then(function(d){var q=document.getElementById("quality");if(!d.quality||!d.quality.length){q.innerHTML="<li>None flagged in this update.</li>";return;}q.innerHTML=d.quality.map(function(x){return "<li>"+LC.esc(x.name)+" ("+LC.esc(x.station)+"): "+LC.esc(x.value)+" mm of rain recorded on "+LC.niceDate(x.date)+". Kept as published; to be checked against the gauge log.</li>";}).join("");}).catch(function(){});</script>
+
+</body>
+</html>

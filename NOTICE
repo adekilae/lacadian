@@ -1,6 +1,9 @@
-Station data: LaCADIAN network (Louisiana Climate & Digital Ag Network),
-LSU Soil Hydrology and Remote Sensing (SHaRE) Lab,
-https://github.com/soil-hydrology/LaCADIAN.
-The LSU AgCenter LaCADIAN page states the data licence as CC BY-NC 4.0
+Station data: LaCADIAN network (Louisiana Climate & Digital Ag Network), LSU Soil Hydrology and Remote Sensing (SHaRE) Lab,
+https://github.com/soil-hydrology/LaCADIAN. The LSU AgCenter LaCADIAN page states the licence as CC BY-NC 4.0
 (academic and non-commercial use). Confirm with the network team.
-Map tiles: (c) OpenStreetMap contributors. Map library: Leaflet (BSD-2-Clause).
+Gridded rainfall: gridMET, University of Idaho (Abatzoglou 2013).
+Soil moisture: NASA SMAP Level 4. Vegetation: NASA VIIRS VNP13A3.
+Drought: US Drought Monitor (National Drought Mitigation Center, USDA, NOAA).
+Crops: USDA NASS Cropland Data Layer. Soils: USDA NRCS SSURGO.
+Flood risk: FEMA National Risk Index. Surface water: European Commission JRC Global Surface Water.
+Boundaries: US Census Bureau. Map tiles: (c) OpenStreetMap contributors, (c) CARTO. Imagery: Esri, Maxar. Map library: Leaflet (BSD-2-Clause).

@@ -45,7 +45,9 @@ STALE_DAYS = 3            # a station whose last reading is older than this (com
 
 # readings outside these limits cannot be real and are left out
 CHECKS = {"precip": (0, 600), "air_mean": (-40, 55), "sm5": (0.0, 0.7), "sm10": (0.0, 0.7), "sm20": (0.0, 0.7),
-          "sm50": (0.0, 0.7), "sm100": (0.0, 0.7)}
+          "sm50": (0.0, 0.7), "sm100": (0.0, 0.7),
+          "st5": (-20, 60), "st10": (-20, 60), "st20": (-20, 60), "st50": (-20, 60), "st100": (-20, 60),
+          "ec5": (0, 60), "ec10": (0, 60), "ec20": (0, 60), "ec50": (0, 60), "ec100": (0, 60)}
 
 NAMES = {"Ben_Hur": "Ben Hur", "StGabriel": "St. Gabriel", "BossierCity": "Bossier City", "Alexandria_West": "Alexandria West",
          "Alexandria_East": "Alexandria East", "StJoseph": "St. Joseph", "LAHouse": "LA House", "LakeProvidence": "Lake Providence",
@@ -111,7 +113,7 @@ def station_summary(rows):
     full = {d: r for d, r in zip(dates, rows)}
     span = [last - dt.timedelta(i) for i in range(SERIES_DAYS - 1, -1, -1)]          # the days sent for the charts (gaps stay empty)
     ser = {"dates": [d.isoformat() for d in span]}
-    for k in ("precip", "air_mean", "sm5", "sm10", "sm20", "sm50", "sm100"):
+    for k in ("precip", "air_mean", "sm5", "sm10", "sm20", "sm50", "sm100", "st5", "st20", "st50", "ec5", "ec20", "ec50"):
         ser[k] = [None if d not in full or full[d][k] is None else round(full[d][k], 3) for d in span]
 
     def total(days):
@@ -133,7 +135,8 @@ def station_summary(rows):
     latest = rows[-1]
     out = {
         "last": last.isoformat(), "first": dates[0].isoformat(), "days": len(rows),
-        "latest": {"precip": latest["precip"], "air": latest["air_mean"], "sm": {str(d): latest[f"sm{d}"] for d in DEPTHS}},
+        "latest": {"precip": latest["precip"], "air": latest["air_mean"], "sm": {str(d): latest[f"sm{d}"] for d in DEPTHS},
+                   "st": {str(d): latest[f"st{d}"] for d in DEPTHS}, "ec": {str(d): latest[f"ec{d}"] for d in DEPTHS}},
         "rain7": r7, "rain7_missing": miss7, "rain30": r30, "rain30_missing": miss30, "dry_now": now_run,
         "dry_longest": ({"days": longest[1], "from": season[longest[0]].isoformat(), "to": season[longest[0] + longest[1] - 1].isoformat()}
                         if longest else None),
@@ -182,14 +185,19 @@ def self_test():
         d = start + dt.timedelta(i)
         p = 20.0 if i in (10, 60) else 0.0
         rows.append({"date": d.isoformat(), "precip": None if i == 129 else p, "air_mean": 20.0, "sm5": 0.2 + i / 1000, "sm10": 0.2, "sm20": 0.3 + i / 1000,
-                     "sm50": 0.3, "sm100": 0.3})
+                     "sm50": 0.3, "sm100": 0.3, **{f"st{d}": 20.0 + d / 10 for d in DEPTHS}, **{f"ec{d}": 1.0 for d in DEPTHS}})
     s = station_summary(rows)
     assert s["last"] == "2026-07-08" and s["days"] == 130 and s["rain7"] == 0.0 and s["rain7_missing"] == 1
     assert s["dry_now"] == 68                  # 61 .. 128 dry, day 129 has no reading, so the run ends at day 128
     assert s["dry_longest"]["days"] == 68, s["dry_longest"]
     assert s["rel"]["5"] > 99 and s["series"]["dates"][-1] == "2026-07-08" and len(s["series"]["precip"]) == SERIES_DAYS
     assert s["series"]["precip"][-1] is None and s["series"]["precip"][-2] == 0.0
-    print("self-test passed: 6 groups")
+    assert s["latest"]["st"]["5"] == 20.5 and s["latest"]["ec"]["20"] == 1.0 and len(s["series"]["st20"]) == SERIES_DAYS
+    flags = []                                                  # impossible temperature and salinity are left out
+    row = {"date": "2026-02-04", "precip": 1, "air_mean": 10, "st5": 80.0, "ec5": -1.0, "st20": 15.0, "ec20": 2.0}
+    clean(row, flags)
+    assert row["st5"] is None and row["ec5"] is None and row["st20"] == 15.0 and len(flags) == 2
+    print("self-test passed: 7 groups")
 
 
 # ============================================================ reading the repository
@@ -251,7 +259,11 @@ def main():
         "depths_cm": DEPTHS, "dry_day_mm": DRY_MM, "min_record_days": MIN_RECORD,
         "quality": quality, "stations": stations,
     }
-    Path(args.out).write_text(json.dumps(payload, separators=(",", ":"), ensure_ascii=False))
+    text = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
+    out = Path(args.out)
+    out.write_text(text)
+    # a .js copy lets the pages work when index.html is opened straight from disk (no web server)
+    out.with_suffix(".js").write_text('window.__LC=window.__LC||{};window.__LC["data/' + out.name + '"]=' + text + ';')
     print(f"Wrote {args.out}: {len(stations)} stations, data through {newest}, {len(quality)} quality notes")
     for q in quality:
         print("  note:", q)
