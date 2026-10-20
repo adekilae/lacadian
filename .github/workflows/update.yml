@@ -1,0 +1,28 @@
+name: Update station data
+on:
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: soil-hydrology/LaCADIAN
+          path: _source
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build data/stations.json
+        run: python scripts/stations.py --repo _source
+      - name: Commit if changed
+        run: |
+          git config user.name "lacadian-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/stations.json
+          git diff --cached --quiet || git commit -m "Update station data"
+          git push
