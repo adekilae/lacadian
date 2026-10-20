@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install numpy
+        run: pip install numpy
       - name: Build data/stations.json
         run: python scripts/stations.py --repo _source
       - name: Commit if changed
