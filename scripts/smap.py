@@ -121,7 +121,7 @@ def read_with_retry(earthaccess, granule, slices, key):
 
 def load_real(today):
     import earthaccess
-    from common import earthdata_login
+    from common import cmr_search, earthdata_login
     earthdata_login()                                  # tries several times; exits with a plain message if NASA is unreachable
     have, grid = load_cache()
     slices = None
@@ -133,7 +133,7 @@ def load_real(today):
         if not missing:
             continue
         last_day = (dt.date(y + (m == 12), m % 12 + 1, 1) - dt.timedelta(days=1)).day
-        found = earthaccess.search_data(short_name=SHORT_NAME, version=VERSION, count=-1,
+        found = cmr_search(short_name=SHORT_NAME, version=VERSION, count=-1,
                                         temporal=(f"{y}-{m:02d}-01", f"{y}-{m:02d}-{last_day}"))
         pick = {}
         for g in found:

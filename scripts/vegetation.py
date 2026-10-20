@@ -152,10 +152,10 @@ def save_cache(have):
 
 def load_real(gdf, tiles, today):
     import earthaccess
-    from common import earthdata_login
+    from common import cmr_search, earthdata_login
     earthdata_login()                                  # tries several times; exits with a plain message if NASA is unreachable
     have = load_cache()
-    found = earthaccess.search_data(short_name=SHORT_NAME, version=VERSION, count=-1, bounding_box=BBOX,
+    found = cmr_search(short_name=SHORT_NAME, version=VERSION, count=-1, bounding_box=BBOX,
                                     temporal=(f"{FIRST_MONTH[0]}-{FIRST_MONTH[1]:02d}-01", today.isoformat()))
     todo = {}
     for g in found:

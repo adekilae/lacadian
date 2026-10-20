@@ -36,6 +36,7 @@ BUILD = 1
 # ---- settings you may want to change -------------------------------------
 URLS = ["https://hazards.fema.gov/nri/Content/StaticDocuments/DataDownload//NRI_Table_Counties/NRI_Table_Counties.zip",
         "https://hazards.fema.gov/nri/Content/StaticDocuments/DataDownload/NRI_Table_Counties/NRI_Table_Counties.zip"]
+ARCGIS = "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/National_Risk_Index_Counties/FeatureServer/0/query"
 # --------------------------------------------------------------------------
 
 RATINGS = ["very low", "relatively low", "relatively moderate", "relatively high", "very high"]
@@ -93,11 +94,44 @@ def download():
     errors = []
     for u in URLS:
         try:
-            return get_url(u, tries=3, timeout=300).content
+            blob = get_url(u, tries=3, timeout=300).content
+            if blob[:2] == b"PK" or blob.lstrip()[:1] != b"<":
+                return blob
+            errors.append("web page instead of file")
         except Exception as e:
             errors.append(f"{type(e).__name__} {str(e)[:100]}")
-    sys.exit("The FEMA National Risk Index file could not be downloaded (" + " | ".join(errors) +
-             "). Download the county table from hazards.fema.gov/nri/data-resources and put it in data/source/NRI_Table_Counties.zip.")
+    try:
+        return from_arcgis()
+    except Exception as e:
+        errors.append(f"ArcGIS {type(e).__name__} {str(e)[:100]}")
+    sys.exit("The FEMA National Risk Index table could not be downloaded (" + " | ".join(errors) +
+             "). Download 'All Counties - County-level detail (Table)' from hazards.fema.gov/nri/data-resources "
+             "and put the CSV or zip in data/source/ as NRI_Table_Counties.csv or NRI_Table_Counties.zip.")
+
+
+def from_arcgis():
+    """FEMA's public county feature service, Louisiana rows only -> CSV bytes with the same column names as the table."""
+    import requests
+    out, offset = [], 0
+    while True:
+        r = requests.get(ARCGIS, params={"where": "STATEFIPS='22'", "outFields": "*", "returnGeometry": "false", "f": "json",
+                                         "resultOffset": offset, "resultRecordCount": 100}, timeout=120)
+        r.raise_for_status()
+        js = r.json()
+        feats = js.get("features")
+        if feats is None:
+            raise RuntimeError(str(js)[:150])
+        out += [f["attributes"] for f in feats]
+        if not js.get("exceededTransferLimit") or not feats:
+            break
+        offset += len(feats)
+    if not out:
+        raise RuntimeError("no rows")
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=sorted({k for r in out for k in r}))
+    w.writeheader()
+    w.writerows(out)
+    return buf.getvalue().encode("utf-8")
 
 
 def money(v):

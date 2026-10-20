@@ -165,6 +165,21 @@ def earthdata_login(tries=4):
     sys.exit(f"Could not log in to NASA Earthdata: {type(last).__name__} {str(last)[:200]}")
 
 
+def cmr_search(tries=6, **kw):
+    """earthaccess.search_data with retries: NASA's catalogue sometimes answers 'Internal Error' for a minute."""
+    import time
+    import earthaccess
+    last = None
+    for attempt in range(1, tries + 1):
+        try:
+            return earthaccess.search_data(**kw)
+        except Exception as e:
+            last = e
+            print(f"  NASA catalogue error ({str(e)[:80]}); try {attempt} of {tries}", flush=True)
+            time.sleep(20 * attempt)
+    raise last
+
+
 # ---------------------------------------------------------------------------- writing layers
 def _write_pair(path_json, obj, compact=True):
     """Write data/x.json and data/x.js. The .js copy lets the pages work when index.html is opened straight from disk."""
