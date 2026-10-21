@@ -327,6 +327,7 @@ def build(gdf, have, lat, lon, source, today):
         "limits": [
             "The values come from NASA SMAP Level 4, which feeds satellite readings into a land model. They are modelled estimates of moisture at depth, not direct measurements.",
             f"The record starts in 2015, so normal is based on {n} earlier years and the rankings are coarse.",
+            "A value of 82% means 82% of the average for that month in earlier years. It is not the share of water plants can use.",
             "The grid is about 9 km. It works for parish averages and not for single fields, and small parishes rest on one or two cells.",
             "Satellite readings are weak over forest, marsh and open water, so coastal values lean more on the model.",
             f"Each month uses up to {len(SAMPLE_DAYS)} sample days at one time of day, not every hour.",

@@ -335,6 +335,7 @@ def build(gdf, have, total, tiles, source):
         "limits": [
             "It covers all vegetation (crops, grass, forest, marsh). A low value can come from dry weather, late planting, flooding, harvest, clearing or a freeze.",
             f"Clouds hide the ground and coastal parishes include open water. A parish is left unrated when under {MIN_USABLE * 100:.0f}% of its pixels were usable.",
+            "A value near 100% means greenness is near normal for the month. It does not show whether crops are healthy.",
             "The grid is about 1 km, so it works for parish averages and not for fields.",
             "The record starts in 2012, so normal is based on about a dozen years.",
             "The monthly file comes out about six weeks after the month ends.",

@@ -222,7 +222,7 @@ def build(gdf, dates, rain):
             "The values come from gridMET, a 4 km grid that mixes PRISM (built from rain gauges) with a land model. It is an estimate of rain, not a gauge reading.",
             "A parish value is the average of the grid cells inside it, so a storm over part of a big parish gets smoothed out.",
             "The newest days are provisional and get revised for a few weeks. A month only counts when every day is in the record.",
-            "Normal here means 1991 to 2020. The map says nothing about whether soil or crops are short of water.",
+            "Normal here means 1991 to 2020. A value of 70% means 30% less rain than the average for those months. The map says nothing about whether soil or crops are short of water.",
             "The table under the map compares gridMET with the station gauges where both have data.",
         ],
         "credits": [{"text": "Rainfall: gridMET, Abatzoglou, J.T. (2013), Int. J. Climatology 33: 121-131", "url": "https://www.climatologylab.org/gridmet.html"}, BOUNDARY_CREDIT],
