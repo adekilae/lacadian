@@ -242,3 +242,4 @@ tbody tr:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; 
 .period select { width: auto; min-width: 110px; }
 .two { display: flex; gap: 6px; }
 .two select { min-width: 0; }
+

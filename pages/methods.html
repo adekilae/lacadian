@@ -6,7 +6,7 @@
 <title>Data and methods | LaCADIAN Environmental Intelligence</title>
 <meta name="description" content="Sources, methods and limits of every LaCADIAN Environmental Intelligence map.">
 <link rel="stylesheet" href="../vendor/leaflet.css">
-<link rel="stylesheet" href="../css/main.css?v=8">
+<link rel="stylesheet" href="../css/main.css?v=10">
 </head>
 <body>
 <header id="hdr"></header>
@@ -42,7 +42,7 @@
 </main>
 <footer id="ftr"></footer>
 <script src="../vendor/leaflet.js"></script>
-<script src="../js/site.js?v=8"></script>
+<script src="../js/site.js?v=10"></script>
 <script>LC.getData("data/stations.json").then(function(d){var q=document.getElementById("quality");if(!d.quality||!d.quality.length){q.innerHTML="<li>None flagged in this update.</li>";return;}q.innerHTML=d.quality.map(function(x){return "<li>"+LC.esc(x.name)+" ("+LC.esc(x.station)+"): "+LC.esc(x.value)+" mm of rain recorded on "+LC.niceDate(x.date)+". Kept as published; to be checked against the gauge log.</li>";}).join("");}).catch(function(){});</script>
 
 </body>

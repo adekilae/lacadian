@@ -41,6 +41,10 @@ MIN_REF = 15                     # reference years a gauge needs
 STALE_DAYS = 10                  # a gauge whose newest value is older than this is left out
 MIN_LAST_YEARS = 15              # a gauge needs at least this many years of record in the reference period
 STATE_NAMES = ("Louisiana",)
+MAX_MINUTES = 40                 # stop downloading after this long; what is saved is used now and the rest continues next run
+PAUSE = 0.7                      # seconds between requests, to stay under the rate limit
+ACTIVE_DAYS = 45                 # a gauge must have reported within this many days
+MIN_BEGIN_YEAR = 2006            # and have started before this year, so it can have 15 years of record
 CACHE_FILE = CACHE / "usgs_flow.npz"
 META_FILE = CACHE / "usgs_flow_sites.json"
 EPOCH = dt.date(1970, 1, 1)
@@ -52,7 +56,11 @@ CATS = [dict(c, label=l, note=n) for c, l, n in zip(WETNESS,
 
 
 # ============================================================ talking to the API
-def _get(url, params=None, tries=4):
+class RateLimited(RuntimeError):
+    pass
+
+
+def _get(url, params=None, tries=5):
     import requests
     headers = {"Accept": "application/json"}
     if os.environ.get("USGS_API_KEY"):
@@ -64,8 +72,9 @@ def _get(url, params=None, tries=4):
             if r.status_code == 200:
                 return r.json()
             if r.status_code == 429:
-                time.sleep(min(120, 20 * attempt))
-                last = RuntimeError("HTTP 429, too many requests (a USGS_API_KEY secret raises the limit)")
+                wait = r.headers.get("Retry-After", "")
+                time.sleep(min(180, int(wait) if wait.isdigit() else 30 * attempt))
+                last = RateLimited("HTTP 429, too many requests (a free USGS_API_KEY secret raises the limit)")
                 continue
             if r.status_code in (400, 404):
                 raise ValueError(f"HTTP {r.status_code}: {r.text[:150]}")
@@ -95,8 +104,17 @@ def is_louisiana(props):
     return str(props.get("state_name", "")) in STATE_NAMES or str(props.get("state_code", "")) in ("22", "US:22", "LA")
 
 
-def list_gauges():
-    """-> {monitoring_location_id: {"name", "lon", "lat"}} for Louisiana sites that have a discharge series."""
+def _day(v):
+    try:
+        return dt.date.fromisoformat(str(v)[:10])
+    except (TypeError, ValueError):
+        return None
+
+
+def list_gauges(today=None):
+    """-> {monitoring_location_id: {"name", "lon", "lat"}} for Louisiana sites with a discharge series that is still reporting
+    and started early enough to have a long record. Tidal sites are left out."""
+    today = today or dt.date.today()
     base = f"{API}/collections/combined-metadata/items"
     tries = [{"state_name": "Louisiana"}, {"state_code": "22"}, {"state_code": "US:22"}]
     last = None
@@ -113,6 +131,13 @@ def list_gauges():
                 continue
             sid = p.get("monitoring_location_id") or p.get("id")
             if not sid or g.get("type") != "Point":
+                continue
+            if str(p.get("site_type_code") or "") == "ST-TS":
+                continue                                                  # tidal stream
+            end, begin = _day(p.get("end") or p.get("end_utc")), _day(p.get("begin") or p.get("begin_utc"))
+            if end is not None and (today - end).days > ACTIVE_DAYS:
+                continue
+            if begin is not None and begin.year > MIN_BEGIN_YEAR:
                 continue
             sites[sid] = {"name": p.get("monitoring_location_name") or sid, "lon": g["coordinates"][0], "lat": g["coordinates"][1],
                           "type": p.get("site_type_code") or ""}
@@ -174,27 +199,40 @@ def merge(old, rows):
 
 
 def download(today):
-    sites = list_gauges()
-    print(f"{len(sites)} Louisiana gauges with a discharge series")
+    sites = list_gauges(today)
+    print(f"{len(sites)} Louisiana gauges that are still reporting and have a long record")
     series = load_cache()
-    failed = 0
-    for i, (sid, m) in enumerate(sorted(sites.items())):
+    failed, in_a_row, t0 = 0, 0, time.time()
+    # gauges we have never downloaded first, then the ones that only need an update
+    order = sorted(sites, key=lambda k: (k in series, k))
+    for i, sid in enumerate(order):
+        m = sites[sid]
+        if time.time() - t0 > MAX_MINUTES * 60:
+            left = len(order) - i
+            print(f"Time limit reached after {MAX_MINUTES} minutes: {left} gauges are left for the next run.")
+            break
+        time.sleep(PAUSE)
         old = series.get(sid)
         start = dt.date(FIRST_YEAR, 1, 1) if old is None else EPOCH + dt.timedelta(days=int(old["days"][-1]) - 45)
         try:
             rows = fetch_daily(sid, start.isoformat(), today.isoformat())
         except Exception as e:
             failed += 1
+            in_a_row += 1
             print(f"  {sid}: {str(e)[:100]}", flush=True)
+            if in_a_row >= 12:
+                print("Twelve requests in a row failed (rate limit or outage). Stopping for this run; the rest continues next run.")
+                break
             if failed >= 8 and not series:
                 raise RuntimeError("Too many gauges failed; the USGS service may be down.")
             continue
+        in_a_row = 0
         if not rows and old is None:
             continue
         d, v = merge(old, rows)
         series[sid] = dict(m, days=d, vals=v)
         if (i + 1) % 20 == 0:
-            print(f"  {i + 1} of {len(sites)} gauges", flush=True)
+            print(f"  {i + 1} of {len(order)} gauges", flush=True)
             save_cache(series)
     save_cache(series)
     return series
@@ -373,8 +411,21 @@ def self_test():
         assert p["22001"]["cat"] == "very_wet" and p["22002" if False else "22003"]["cat"] == "very_dry" and p["22005"]["cat"] == "not_rated", {k: v["cat"] for k, v in p.items()}
         assert len(p["22001"]["v"]) == 12 and p["22001"]["rows"][0][0] == "River A" and out["counts"]["not_rated"] == 1
     common.DATA = common.DATA
+    # only active gauges with a long record, no tidal ones
+    def feat(sid, begin, end, typ="ST"):
+        return {"properties": {"monitoring_location_id": sid, "state_name": "Louisiana", "parameter_code": "00060", "begin": begin, "end": end,
+                               "site_type_code": typ, "monitoring_location_name": sid}, "geometry": {"type": "Point", "coordinates": [-91.0, 30.0]}}
+    fake = [feat("USGS-A", "1980-01-01", "2026-10-19"), feat("USGS-B", "2015-01-01", "2026-10-19"), feat("USGS-C", "1980-01-01", "2019-01-01"),
+            feat("USGS-D", "1980-01-01", "2026-10-19", "ST-TS")]
+    global _pages
+    keep = _pages
+    _pages = lambda *a, **k: fake
+    try:
+        assert list(list_gauges(today)) == ["USGS-A"], list(list_gauges(today))
+    finally:
+        _pages = keep
     assert is_louisiana({"state_name": "Louisiana"}) and is_louisiana({"state_code": "22"}) and not is_louisiana({"state_name": "Texas"})
-    print("self-test passed: 5 groups")
+    print("self-test passed: 6 groups")
 
 
 def main():
