@@ -532,6 +532,15 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "updated": "2026-10-20"
   },
   {
+   "key": "streamflow",
+   "label": "River and streamflow",
+   "page": "land",
+   "file": "data/streamflow.json",
+   "built": false,
+   "months": false,
+   "periods": []
+  },
+  {
    "key": "landcover",
    "label": "Land-cover change",
    "page": "land",
