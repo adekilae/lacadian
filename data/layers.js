@@ -8,7 +8,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "soil",
@@ -18,7 +18,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "dryspell",
@@ -28,7 +28,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": false,
    "periods": [],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "airtemp",
@@ -38,7 +38,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "et0",
@@ -48,7 +48,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "soilsurf",
@@ -58,7 +58,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "soildef",
@@ -68,7 +68,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "soilgap",
@@ -78,7 +78,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "usdm",
@@ -148,7 +148,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
     "2022-01",
     "2021-12"
    ],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "usdm_onset",
@@ -218,7 +218,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
     "2022-01",
     "2021-12"
    ],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "cropland",
@@ -509,7 +509,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-20"
+   "updated": "2026-10-21"
   },
   {
    "key": "flood",
@@ -536,9 +536,10 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "label": "River and streamflow",
    "page": "land",
    "file": "data/streamflow.json",
-   "built": false,
+   "built": true,
    "months": false,
-   "periods": []
+   "periods": [],
+   "updated": "2026-10-21"
   },
   {
    "key": "landcover",
