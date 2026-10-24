@@ -18,7 +18,7 @@
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-22"
+   "updated": "2026-10-24"
   },
   {
    "key": "dryspell",
@@ -58,7 +58,7 @@
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-22"
+   "updated": "2026-10-24"
   },
   {
    "key": "soildef",
@@ -68,7 +68,7 @@
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-22"
+   "updated": "2026-10-24"
   },
   {
    "key": "soilgap",
@@ -78,7 +78,7 @@
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-22"
+   "updated": "2026-10-24"
   },
   {
    "key": "usdm",
@@ -509,7 +509,7 @@
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-10-22"
+   "updated": "2026-10-24"
   },
   {
    "key": "flood",
