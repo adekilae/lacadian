@@ -5,7 +5,8 @@ LaCADIAN site - run every layer that is due.
   stations     every run, from a checkout of the LaCADIAN data repository (LACADIAN_SRC, default "_source")
   rainfall     every run: gridMET daily rain by parish (gridmet.py), then the rainfall layer and the dry-spell layer
   temperature and evaporative demand   every run: gridMET daily temperature and ET0 (gridmet_extra.py), then climate.py
-  soil moisture, vegetation   every run, if a NASA Earthdata login is available
+  soil moisture (SMAP)   Mondays on the daily schedule, and on any manual run or when never built, if a NASA Earthdata login is available
+  vegetation   the first Monday of each month, and on any manual run or when never built, if a NASA Earthdata login is available
   river flow   every run: USGS gauges (streamflow.py); a failure is only a note, the earlier map is kept
   check        after those: compares gridMET and SMAP with the stations (validate.py)
   Drought Monitor   every run
@@ -62,7 +63,16 @@ jobs.append(("rainfall layer", ["rain.py"]))
 jobs.append(("air temperature and evaporative demand", ["climate.py"]))
 jobs.append(("dry spells", ["dryspell.py"]))
 if earthdata:
-    jobs += [("soil moisture (SMAP)", ["smap.py"]), ("vegetation", ["vegetation.py"])]
+    manual = os.environ.get("GITHUB_EVENT_NAME", "") == "workflow_dispatch"
+    monday = today.weekday() == 0 or manual
+    if monday or not (DATA / "soil.json").exists():
+        jobs.append(("soil moisture (SMAP)", ["smap.py"]))
+    else:
+        print("Skipping soil moisture: it is updated on Mondays (or when run by hand).")
+    if (today.weekday() == 0 and today.day <= 7) or manual or not (DATA / "vegetation.json").exists():
+        jobs.append(("vegetation", ["vegetation.py"]))
+    else:
+        print("Skipping vegetation: it is updated on the first Monday of the month (or when run by hand).")
 else:
     print("Skipping soil moisture and vegetation: no EARTHDATA_USERNAME / EARTHDATA_PASSWORD set.")
 if Path(src).exists():
