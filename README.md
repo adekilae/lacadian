@@ -1,4 +1,4 @@
-# LaCADIAN Environmental Intelligence (unofficial prototype, for review)
+# LaCADIAN Environmental Intelligence (initial prototype, under review)
 
 Maps of Louisiana by parish, plus the LaCADIAN field stations. Static pages (Leaflet), no build step.
 

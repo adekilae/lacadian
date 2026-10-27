@@ -225,7 +225,7 @@
     $("how").textContent = D.how || "";
     $("limits").innerHTML = (D.limits || []).map(t => `<li>${esc(t)}</li>`).join("");
     $("credits").innerHTML = (D.credits || []).map(c => `<li>${c.url ? `<a href="${esc(c.url)}" rel="noopener">${esc(c.text)}</a>` : esc(c.text)}</li>`).join("");
-    $("cite").textContent = `LaCADIAN Environmental Intelligence (unofficial prototype), ${new Date(D.period ? D.period + "-01" : D.updated).getFullYear()}. ${D.title}: ${D.subtitle || ""}. Source: ${D.source}. ${D.period ? "Period " + D.period_label : "Updated " + D.updated}.`;
+    $("cite").textContent = `LaCADIAN Environmental Intelligence (prototype), ${new Date(D.period ? D.period + "-01" : D.updated).getFullYear()}. ${D.title}: ${D.subtitle || ""}. Source: ${D.source}. ${D.period ? "Period " + D.period_label : "Updated " + D.updated}.`;
     restyle(); ranking(); validation(D); bottom();
     if (sel) pinfo();
   }

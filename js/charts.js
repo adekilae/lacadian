@@ -80,7 +80,7 @@
       const m = Object.fromEntries((p.rows || []).map(r => [r[0], r[1]]));
       lines.push([id, p.name, label[p.cat] || "", p.big, p.big_note || ""].concat(labels.map(l => m[l] == null ? "" : m[l])).map(LC.csvQuote).join(","));
     });
-    lines.push("", LC.csvQuote(`LaCADIAN Environmental Intelligence (unofficial prototype). ${D.title}. Source: ${D.source}. ${D.period ? "Period " + D.period + "." : "Updated " + D.updated + "."} Not for farm decisions.`));
+    lines.push("", LC.csvQuote(`LaCADIAN Environmental Intelligence (prototype). ${D.title}. Source: ${D.source}. ${D.period ? "Period " + D.period + "." : "Updated " + D.updated + "."} Not for farm decisions.`));
     return lines.join("\n");
   }
 
@@ -108,7 +108,7 @@
     cats.forEach(c => { g.fillStyle = c.color; g.fillRect(W - 640, ly, 34, 34); g.strokeStyle = "#555"; g.strokeRect(W - 640, ly, 34, 34); g.fillStyle = "#17232d"; g.fillText(`${c.label} (${D.counts[c.key]})`, W - 590, ly + 27, 520); ly += 46; });
     g.fillStyle = "#566670"; g.font = `28px ${SANS}`;
     g.fillText(`Source: ${D.source}. ${D.period ? "Period " + D.period + "." : "Updated " + D.updated + "."}`, 80, H - 90, W - 160);
-    g.fillText("LaCADIAN Environmental Intelligence (unofficial prototype, not approved by the network team). Not for farm decisions. Boundaries: US Census Bureau.", 80, H - 45, W - 160);
+    g.fillText("LaCADIAN Environmental Intelligence (prototype). Not for farm decisions. Boundaries: US Census Bureau.", 80, H - 45, W - 160);
     return cv.toDataURL("image/png");
   }
   function savePng(D, gj) {

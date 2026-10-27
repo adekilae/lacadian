@@ -37,7 +37,7 @@
       h.innerHTML = `<div class="wrap bar"><a class="brand" href="${ROOT}index.html" aria-label="LaCADIAN Environmental Intelligence home"><span class="mark" aria-hidden="true"></span><span class="brandtext"><span class="name">LaCADIAN Environmental Intelligence</span></span></a>
         <nav class="nav" aria-label="Pages">${NAV.map(([t, u]) => `<a href="${ROOT}${u}"${t === PAGE ? ' aria-current="page"' : ""}>${esc(t)}</a>`).join("")}</nav>
         <form class="hsearch" role="search" onsubmit="return false"><input type="search" id="hs" name="lc-search" list="hs-list" autocomplete="off" spellcheck="false" placeholder="Search for a parish or layer" aria-label="Search parish or layer"><datalist id="hs-list"></datalist></form></div>
-        <div class="proto"><div class="wrap"><strong>Unofficial prototype.</strong> Built from public data by a graduate student. The LaCADIAN network team has not reviewed it, and it should not be used to make farm decisions.</div></div>`;
+        <div class="proto"><div class="wrap"><strong>Initial prototype.</strong> Built from public data by a graduate student. It is under review with the LaCADIAN network team and the LSU AgCenter before it is incorporated, and it should not be used to make farm decisions.</div></div>`;
       const box = document.getElementById("hs");
       let index = null;
       const load = () => index || (index = Promise.all([getData("data/parishes.geojson"), getData("data/layers.json")]).then(([gj, man]) => {

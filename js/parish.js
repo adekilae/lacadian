@@ -84,7 +84,7 @@
       const rows = p.rows && p.rows.length ? p.rows : [["", ""]];
       rows.forEach((r, i) => lines.push((i === 0 ? [D.label, p.big, cls, p.big_note || ""] : ["", "", "", ""]).concat([r[0], r[1]], i === 0 ? [D.source, D.updated] : ["", ""]).map(csvQuote).join(",")));
     });
-    lines.push("", csvQuote(`LaCADIAN Environmental Intelligence (unofficial prototype). ${f.name} Parish. Not for farm decisions.`));
+    lines.push("", csvQuote(`LaCADIAN Environmental Intelligence (prototype). ${f.name} Parish. Not for farm decisions.`));
     saveText(`lacadian-parish-${id}.csv`, lines.join("\n"));
   });
 })();
