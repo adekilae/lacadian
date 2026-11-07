@@ -8,7 +8,7 @@
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-06"
+   "updated": "2026-11-07"
   },
   {
    "key": "soil",
@@ -28,7 +28,7 @@
    "built": true,
    "months": false,
    "periods": [],
-   "updated": "2026-11-06"
+   "updated": "2026-11-07"
   },
   {
    "key": "airtemp",
@@ -38,7 +38,7 @@
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-06"
+   "updated": "2026-11-07"
   },
   {
    "key": "et0",
@@ -48,7 +48,7 @@
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-06"
+   "updated": "2026-11-07"
   },
   {
    "key": "soilsurf",
@@ -149,7 +149,7 @@
     "2022-01",
     "2021-12"
    ],
-   "updated": "2026-11-06"
+   "updated": "2026-11-07"
   },
   {
    "key": "usdm_onset",
@@ -220,7 +220,7 @@
     "2022-01",
     "2021-12"
    ],
-   "updated": "2026-11-06"
+   "updated": "2026-11-07"
   },
   {
    "key": "cropland",
@@ -541,7 +541,7 @@
    "built": true,
    "months": false,
    "periods": [],
-   "updated": "2026-11-06"
+   "updated": "2026-11-07"
   },
   {
    "key": "landcover",
