@@ -8,7 +8,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-22"
+   "updated": "2026-11-23"
   },
   {
    "key": "soil",
@@ -18,7 +18,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-16"
+   "updated": "2026-11-23"
   },
   {
    "key": "dryspell",
@@ -28,7 +28,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": false,
    "periods": [],
-   "updated": "2026-11-22"
+   "updated": "2026-11-23"
   },
   {
    "key": "airtemp",
@@ -38,7 +38,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-22"
+   "updated": "2026-11-23"
   },
   {
    "key": "et0",
@@ -48,7 +48,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-22"
+   "updated": "2026-11-23"
   },
   {
    "key": "soilsurf",
@@ -58,7 +58,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-16"
+   "updated": "2026-11-23"
   },
   {
    "key": "soildef",
@@ -68,7 +68,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-16"
+   "updated": "2026-11-23"
   },
   {
    "key": "soilgap",
@@ -78,7 +78,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-16"
+   "updated": "2026-11-23"
   },
   {
    "key": "usdm",
@@ -149,7 +149,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
     "2022-01",
     "2021-12"
    ],
-   "updated": "2026-11-22"
+   "updated": "2026-11-23"
   },
   {
    "key": "usdm_onset",
@@ -220,7 +220,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
     "2022-01",
     "2021-12"
    ],
-   "updated": "2026-11-22"
+   "updated": "2026-11-23"
   },
   {
    "key": "cropland",
@@ -541,7 +541,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": false,
    "periods": [],
-   "updated": "2026-11-22"
+   "updated": "2026-11-23"
   },
   {
    "key": "landcover",
