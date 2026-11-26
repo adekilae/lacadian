@@ -8,7 +8,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-25"
+   "updated": "2026-11-26"
   },
   {
    "key": "soil",
@@ -28,7 +28,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": false,
    "periods": [],
-   "updated": "2026-11-25"
+   "updated": "2026-11-26"
   },
   {
    "key": "airtemp",
@@ -38,7 +38,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-25"
+   "updated": "2026-11-26"
   },
   {
    "key": "et0",
@@ -48,7 +48,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": true,
    "periods": [],
-   "updated": "2026-11-25"
+   "updated": "2026-11-26"
   },
   {
    "key": "soilsurf",
@@ -149,7 +149,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
     "2022-01",
     "2021-12"
    ],
-   "updated": "2026-11-25"
+   "updated": "2026-11-26"
   },
   {
    "key": "usdm_onset",
@@ -220,7 +220,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
     "2022-01",
     "2021-12"
    ],
-   "updated": "2026-11-25"
+   "updated": "2026-11-26"
   },
   {
    "key": "cropland",
@@ -541,7 +541,7 @@ window.__LC=window.__LC||{};window.__LC["data/layers.json"]={
    "built": true,
    "months": false,
    "periods": [],
-   "updated": "2026-11-25"
+   "updated": "2026-11-26"
   },
   {
    "key": "landcover",
